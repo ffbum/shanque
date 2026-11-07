@@ -6,6 +6,12 @@ from flask import current_app, g
 
 def connection():
     if "db" not in g:
+        if current_app.config.get("DATABASE_URL"):
+            from .postgres import Connection
+            g.db = Connection(current_app.config["DATABASE_URL"],
+                              kingbase=current_app.config.get("DATABASE_TYPE") == "kingbase",
+                              schema=current_app.config.get("DATABASE_SCHEMA", "public"))
+            return g.db
         g.db = sqlite3.connect(current_app.config["DATABASE"], timeout=10)
         g.db.row_factory = sqlite3.Row
         g.db.execute("PRAGMA foreign_keys=ON")
@@ -26,6 +32,9 @@ def first(sql, args=()):
 
 
 def initialize():
+    if current_app.config.get("DATABASE_URL"):
+        connection().initialize()
+        return
     connection().execute("PRAGMA journal_mode=WAL")
     connection().executescript(
         Path(__file__).with_name("schema.sql").read_text(encoding="utf-8")

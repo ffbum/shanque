@@ -20,3 +20,8 @@ AGENTS.md
 .env.*
 *.log
 *.exe
+
+.venv*/
+build/
+dist/
+offline/

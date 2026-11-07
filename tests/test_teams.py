@@ -173,7 +173,8 @@ class TeamWorkflows(unittest.TestCase):
         self.app = create_app({"TESTING": True}, instance_path=self.directory.name)
         self.assertIsNone(self.row("SELECT * FROM team_member WHERE person_id=6"))
         with self.app.app_context():
-            self.assertEqual(rows("PRAGMA foreign_key_check"), [])
+            if not self.app.config.get("DATABASE_URL"):
+                self.assertEqual(rows("PRAGMA foreign_key_check"), [])
 
 
 if __name__ == "__main__":

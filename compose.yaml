@@ -1,10 +1,21 @@
 services:
   shanque:
-    image: ${SHANQUE_IMAGE:-ffbum/shanque:1.0}
+    image: ${SHANQUE_IMAGE:-shanque:local}
+    build: .
     ports:
       - "${SHANQUE_PORT:-5086}:5086"
     environment:
       SHANQUE_ADMIN_PASSWORD: "${SHANQUE_ADMIN_PASSWORD:?请先在 .env 中填写初始管理员密码}"
+      SHANQUE_DB_TYPE: "${SHANQUE_DB_TYPE:-}"
+      SHANQUE_DB_HOST: "${SHANQUE_DB_HOST:-}"
+      SHANQUE_DB_PORT: "${SHANQUE_DB_PORT:-}"
+      SHANQUE_DB_NAME: "${SHANQUE_DB_NAME:-}"
+      SHANQUE_DB_SCHEMA: "${SHANQUE_DB_SCHEMA:-public}"
+      SHANQUE_DB_USER: "${SHANQUE_DB_USER:-}"
+      SHANQUE_DB_PASSWORD: "${SHANQUE_DB_PASSWORD:-}"
+      SHANQUE_DB_SSLMODE: "${SHANQUE_DB_SSLMODE:-prefer}"
+      SHANQUE_DB_CONNECT_TIMEOUT: "${SHANQUE_DB_CONNECT_TIMEOUT:-10}"
+      SHANQUE_DATABASE_URL: "${SHANQUE_DATABASE_URL:-}"
     volumes:
       - shanque-data:/data
     restart: unless-stopped

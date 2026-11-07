@@ -102,7 +102,8 @@ class FrontendAPI(unittest.TestCase):
             initialize()
             initialize()
             self.assertEqual(rows('SELECT project_type FROM project WHERE id=2')[0]['project_type'], '科研')
-            self.assertEqual(rows('PRAGMA foreign_key_check'), [])
+            if not self.app.config.get('DATABASE_URL'):
+                self.assertEqual(rows('PRAGMA foreign_key_check'), [])
         for kind in ('科研', '工程', '固投', '自研', '预研'):
             response = self.post('/projects/new', name=kind+'项目', project_type=kind, leads=[3])
             self.assertEqual(response.status_code, 200, response.json)

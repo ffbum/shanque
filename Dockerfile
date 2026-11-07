@@ -27,6 +27,7 @@ RUN pip install --no-cache-dir -r requirements.txt \
     && chown shanque:shanque /data
 
 COPY run.py ./run.py
+COPY scripts/migrate_sqlite_to_pg.py ./scripts/migrate_sqlite_to_pg.py
 COPY workspace ./workspace
 COPY --from=frontend-build /build/frontend/dist ./frontend/dist
 COPY LICENSE NOTICE ./

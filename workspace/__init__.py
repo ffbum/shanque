@@ -38,6 +38,8 @@ def create_app(config=None, *, instance_path=None):
     )
     if config:
         app.config.update(config)
+    from .database_config import database_config
+    app.config.update(database_config(overrides=config))
     from .presentation import DIST, frontend, wants_json, context
     app.config.setdefault("FRONTEND_ENABLED", DIST.joinpath("index.html").exists() and not app.testing)
     from .accounts import users

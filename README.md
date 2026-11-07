@@ -40,7 +40,7 @@
 
 ### 轻量部署
 
-- Python 后端、React 前端、SQLite 数据库，一个服务提供页面和业务接口。
+- Python 后端、React 前端，一个应用服务提供页面和业务接口；默认 SQLite，也支持外挂 KingbaseES（PG 模式）与 PostgreSQL。
 - 浏览器访问，无需安装客户端；运行服务器无需常驻 Node.js 服务。
 - 使用 SQLite WAL 和任务版本校验处理多人读写与过期页面提交。
 - 深绿主题、紧凑表格和统一图标，优先呈现项目状态与进展。
@@ -63,14 +63,14 @@
 | --- | --- |
 | 前端 | Ant Design Pro 6、React 19、Ant Design 6、Umi Max 4 |
 | 后端 | Python、Flask 3、Waitress 3 |
-| 数据库 | SQLite，启用 WAL 模式 |
+| 数据库 | SQLite（默认） / 外部 KingbaseES PG 模式 / PostgreSQL |
 | 账户导入 | Excel / openpyxl |
 
-当前版本使用 SQLite，不需要单独安装数据库服务。
+默认使用 SQLite，无需单独部署数据库。选择 KingbaseES 或 PostgreSQL 时，应用连接已有外部数据库，Compose 不启动数据库容器。配置与迁移详见 [外部数据库部署](docs/postgresql.md)。
 
 ## Docker 部署
 
-山雀通过 Docker Compose 运行，镜像发布在 [Docker Hub](https://hub.docker.com/r/ffbum/shanque)，当前版本为 `ffbum/shanque:1.0`。服务器安装 Docker Engine 和 Docker Compose v2 即可，无需单独安装 Python、Node.js 或数据库。
+当前源码通过 Docker Compose 构建应用镜像 `shanque:local`，支持在 `.env` 选择数据库。服务器需要 Docker Engine 和 Docker Compose v2，无需单独安装 Python 或 Node.js。已发布的 `ffbum/shanque:1.0` 不包含本次外部数据库适配；使用此功能请从当前源码构建。
 
 ### 首次启动
 
@@ -90,25 +90,23 @@ cp .env.example .env
 PowerShell 使用 `Copy-Item .env.example .env`。编辑 `.env`，将 `SHANQUE_ADMIN_PASSWORD` 的 `CHANGE_ME_BEFORE_STARTING` 替换为 8 至 128 位的密码；保留单引号。也可在这里修改镜像版本和访问端口。`.env` 不提交到 Git。新数据库首次启动时会用该密码创建 `manager`，之后密码保存在数据卷的数据库中。
 
 ```sh
-docker compose pull
-docker compose up -d
+docker compose up -d --build
 docker compose ps
 ```
 
 打开 `http://服务器地址:5086`，用账号 `manager` 和刚设置的密码登录。新数据库只创建管理员和默认团队，不含演示项目。随后在左下角的用户菜单中添加人员、设置团队，并创建项目。
 
-Compose 将数据库和会话密钥保存在名为 `shanque-data` 的 Docker 数据卷中，容器重建或更新镜像时会保留。访问端口由 `.env` 中的 `SHANQUE_PORT` 设置。
+SQLite 模式将数据库和会话密钥保存在 `shanque-data` 数据卷中；外部数据库模式将业务数据保存在外部库，会话密钥仍在该卷中。访问端口由 `.env` 中的 `SHANQUE_PORT` 设置。
 
 ### 更新
 
 在仓库目录执行：
 
 ```sh
-docker compose pull
-docker compose up -d
+docker compose up -d --build
 ```
 
-更新版本时先将 `.env` 中的 `SHANQUE_IMAGE` 改为目标镜像标签，再执行上述命令。数据卷独立于镜像，更新不会覆盖已有台账。
+源码部署更新后重新构建应用镜像。数据卷和外部数据库独立于应用镜像。若使用已发布镜像，按对应版本说明更新。
 
 ## 数据维护与升级
 
@@ -121,6 +119,8 @@ docker compose up -d
 | SQLite 日志文件（如存在） | WAL 等数据库运行文件 |
 
 ### 备份与恢复
+
+以下为 SQLite 模式的备份流程。外部数据库模式需要同时备份数据库和会话密钥卷，详见 [外部数据库部署](docs/postgresql.md)。
 
 停止容器后备份数据卷，再启动服务。Linux/macOS 示例：
 
@@ -137,7 +137,7 @@ docker compose start shanque
 ### 版本升级
 
 1. 停止服务，备份 `shanque-data` 数据卷。
-2. 拉取新镜像并重建容器：`docker compose pull && docker compose up -d`。
+2. 重新构建并启动容器：`docker compose up -d --build`。
 3. 程序会在启动时执行数据库结构升级逻辑。
 4. 登录核对团队、项目、节点与任务。
 

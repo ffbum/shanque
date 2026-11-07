@@ -15,7 +15,8 @@ def wants_json():
 def context():
     from .model import today
     return dict(user=g.get("user"), team=g.get("team"), teams=g.get("teams", []),
-                csrf=session.get("csrf"), today=today().isoformat())
+                csrf=session.get("csrf"), today=today().isoformat(),
+                server_mode=current_app.config.get("SERVER_MODE", False))
 
 
 def json_dates(value):

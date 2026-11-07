@@ -105,7 +105,8 @@ class ParallelHttp(unittest.TestCase):
                 with app.app_context():
                     self.assertEqual(first("SELECT name,status FROM task WHERE id=?", (tasks[0],)),
                                      dict(name=f"winner-{winner}", status="未开始"))
-                    self.assertEqual(rows("PRAGMA foreign_key_check"), [])
+                    if not app.config.get("DATABASE_URL"):
+                        self.assertEqual(rows("PRAGMA foreign_key_check"), [])
                 latest = hidden(browsers[loser].request(path(0))[1], "revision")
                 self.assertEqual(browsers[loser].request(path(0), form(loser, latest, "reconciled"))[0], 200)
                 with app.app_context():
