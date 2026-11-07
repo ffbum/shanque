@@ -81,7 +81,13 @@ git clone https://github.com/ffbum/shanque.git
 cd shanque
 ```
 
-打开 `compose.yaml`，将 `SHANQUE_ADMIN_PASSWORD` 的 `CHANGE_ME_BEFORE_STARTING` 替换为 8 至 128 位的初始管理员密码。新数据库首次启动时用它创建 `manager`，之后密码保存在数据卷的数据库中。不要提交包含实际密码的 `compose.yaml`。
+复制 `.env.example` 为 `.env`，然后在 `.env` 中填写初始管理员密码：
+
+```sh
+cp .env.example .env
+```
+
+PowerShell 使用 `Copy-Item .env.example .env`。编辑 `.env`，将 `SHANQUE_ADMIN_PASSWORD` 的 `CHANGE_ME_BEFORE_STARTING` 替换为 8 至 128 位的密码；保留单引号。也可在这里修改镜像版本和访问端口。`.env` 不提交到 Git。新数据库首次启动时会用该密码创建 `manager`，之后密码保存在数据卷的数据库中。
 
 ```sh
 docker compose pull
@@ -91,7 +97,7 @@ docker compose ps
 
 打开 `http://服务器地址:5086`，用账号 `manager` 和刚设置的密码登录。新数据库只创建管理员和默认团队，不含演示项目。随后在左下角的用户菜单中添加人员、设置团队，并创建项目。
 
-Compose 将数据库和会话密钥保存在名为 `shanque-data` 的 Docker 数据卷中，容器重建或更新镜像时会保留。修改访问端口可设置 `SHANQUE_PORT`，例如 Linux `SHANQUE_PORT=8080 docker compose up -d`，PowerShell `$env:SHANQUE_PORT = "8080"; docker compose up -d`。
+Compose 将数据库和会话密钥保存在名为 `shanque-data` 的 Docker 数据卷中，容器重建或更新镜像时会保留。访问端口由 `.env` 中的 `SHANQUE_PORT` 设置。
 
 ### 更新
 
@@ -102,7 +108,7 @@ docker compose pull
 docker compose up -d
 ```
 
-Compose 固定使用版本标签，更新版本时先将 `compose.yaml` 中的镜像标签改为目标版本，再执行上述命令。数据卷独立于镜像，更新不会覆盖已有台账。
+更新版本时先将 `.env` 中的 `SHANQUE_IMAGE` 改为目标镜像标签，再执行上述命令。数据卷独立于镜像，更新不会覆盖已有台账。
 
 ## 数据维护与升级
 

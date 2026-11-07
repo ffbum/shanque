@@ -15,6 +15,7 @@ frontend/.cache/
 *.key
 .env
 .env.*
+!.env.example
 *.log
 *.exe
 secrets/

@@ -1,10 +1,10 @@
 services:
   shanque:
-    image: ffbum/shanque:1.0
+    image: ${SHANQUE_IMAGE:-ffbum/shanque:1.0}
     ports:
       - "${SHANQUE_PORT:-5086}:5086"
     environment:
-      SHANQUE_ADMIN_PASSWORD: "CHANGE_ME_BEFORE_STARTING"
+      SHANQUE_ADMIN_PASSWORD: "${SHANQUE_ADMIN_PASSWORD:?请先在 .env 中填写初始管理员密码}"
     volumes:
       - shanque-data:/data
     restart: unless-stopped

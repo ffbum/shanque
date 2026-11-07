@@ -16,5 +16,7 @@ AGENTS.md
 *.db
 *.key
 *.env
+.env
+.env.*
 *.log
 *.exe
