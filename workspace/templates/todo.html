@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}我的待办{% endblock %}
+{% block content %}
+  <div class="page">
+    <div class="pagehead">
+      <h1>我的待办</h1>
+      <select id="task-filter" aria-label="任务状态">
+        {% for s in ['待办理','已完成','全部任务','受阻','逾期'] %}
+          <option>{{ s }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <section class="panel" aria-label="我的任务">
+      {% set manage = false %}
+      {% include "tasktable.html" %}
+    </section>
+  </div>
+{% endblock %}

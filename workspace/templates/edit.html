@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% from 'ui.html' import selector,back with context %}
+{% set types = {"project": "项目", "milestone": "节点"} %}
+{% set heading = ('编辑' if (p if kind=='project' else item) else '新建')+types[kind] %}
+{% block title %}{{ heading }}{% endblock %}
+{% block content %}
+  <div class="page">
+    {{ back(p.id if p else none) }}
+    <div class="pagehead">
+      <div>
+        <h1>{{ heading }}</h1>
+        {% if p %}
+          <p>{{ p.name }}</p>
+        {% endif %}
+      </div>
+    </div>
+    <form class="paper" method="post">
+      {{ csrf() }}
+      <label>
+        {{ types[kind] }}名称<input name="name"
+                                  maxlength="{{ 120 if kind=='task' else 80 }}"
+                                  required
+                                  autofocus
+                                  value="{{ p.name if kind=='project' and p else (item.name if item else '') }}">
+      </label>
+      {% if kind=="project" %}
+        <label>项目类型<select name="project_type" required>
+          <option value="">请选择项目类型</option>
+          {% for project_type in ('科研','工程','固投','自研','预研') %}
+            <option value="{{ project_type }}" {{'selected' if p and p.project_type==project_type}}>{{ project_type }}</option>
+          {% endfor %}
+        </select></label>
+        <div class="pair">
+          <label>项目开始日期<input type="date" name="start_date" value="{{ p.start_date or '' if p else '' }}" required></label>
+          <label>项目结束日期<input type="date" name="end_date" value="{{ p.end_date or '' if p else '' }}" required></label>
+        </div>
+        <label>
+          项目说明<textarea name="description" maxlength="2000" rows="3">{{p.description if p else ''}}</textarea>
+        </label>
+        {% if g.user.role=="主管" %}
+          <fieldset>
+            <legend>项目负责人 · 可多选</legend>
+            {{ selector('leads',staff,selected) }}
+          </fieldset>
+        {% endif %}
+      {% elif kind=="milestone" %}
+        <div class="pair">
+          <label>
+            计划日期<input type="date"
+                       name="planned"
+                       value="{{ item.planned if item else '' }}"
+                       required>
+          </label>
+          <label>
+            预计日期 · 选填<input name="forecast"
+                            type="date"
+                            value="{{ item.forecast or '' if item else '' }}">
+          </label>
+        </div>
+        {% if item %}
+          <label>
+            节点任务<select name="key">
+            <option value="">由负责人或主管手动确认达成</option>
+            {% for t in candidates %}
+              <option value="{{ t.id }}" {{'selected' if t.is_key}}>{{ t.name }} · {{ t.status }}</option>
+            {% endfor %}
+            </select>
+          </label>
+        {% endif %}
+      {% endif %}
+      <div class="actions">
+        {% if item and (kind=="milestone") %}
+          <button class="dangerbtn"
+                  name="delete"
+                  value="1"
+                  formnovalidate
+                  data-confirm="确定删除此{{ types[kind] }}？{{'关联任务将保留在项目中。' if kind=='milestone'}}">删除{{ types[kind] }}</button>
+        {% endif %}
+        <a class="btn" href="{{'/projects/'+p.id|string if p else '/'}}">取消</a>
+        <button class="btn primary">保存{{ types[kind] }}</button>
+      </div>
+    </form>
+  </div>
+{% endblock %}

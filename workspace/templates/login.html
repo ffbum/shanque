@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% from 'ui.html' import brand,csrf,icon with context %}
+{% block title %}登录{% endblock %}
+{% block content %}
+    <section class="loginform">
+      <div class="brand">{{ brand() }}</div>
+      <h1>登录项目台账</h1>
+      <form method="post">
+        {{ csrf() }}<label>账号<input name="login" autocomplete="username" required autofocus>
+        </label>
+        <label>
+          密码<input name="password"
+                   type="password"
+                   autocomplete="current-password"
+                   required>
+        </label>
+        <button class="btn primary wide">登录 {{ icon('arrow', 16) }}</button>
+      </form>
+</section>
+{% endblock %}

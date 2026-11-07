@@ -1,0 +1,67 @@
+{% from 'ui.html' import icon,brand,csrf,nav_link with context %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='mark.svg') }}">
+    <title>{% block title %}工作台{% endblock %} · 山雀企业项目工作台</title>
+    <link rel="stylesheet" href="{{ url_for('static',filename='style.css') }}">
+    <script defer src="{{url_for('static',filename='app.js')}}"></script>
+    <script defer src="{{ url_for('static',filename='task-editor.js') }}"></script>
+    {% block assets %}{% endblock %}
+  </head>
+  <body>
+    {% if g.user %}
+      <aside class="sidebar">
+        <a class="brand" href="/" aria-label="山雀企业项目工作台">{{ brand() }}</a>
+        <nav aria-label="主导航">
+          {{ nav_link('work.overview', '项目总览', 'grid', request.blueprint=='work' and request.endpoint not in ('work.todo','work.gantt')) }}
+          {{ nav_link('work.gantt', '项目甘特图', 'timeline', request.endpoint=='work.gantt') }}
+          {{ nav_link('work.todo', '我的待办', 'checklist', request.endpoint=='work.todo') }}
+          {% if g.team %}
+            {{ nav_link('teams.members', '人员管理', 'users', request.endpoint=='teams.members') }}
+          {% endif %}
+        </nav>
+        <div class="profile">
+          <details class="profile-menu">
+            <summary class="profile-trigger" aria-label="切换团队与账号设置" title="切换团队与账号设置">
+              <span class="avatar">{{ g.user.name[-1] }}</span>
+              <span class="profile-identity"><b>{{ g.user.name }}</b><small>{{ g.team.name if g.team else '尚未加入团队' }}</small></span>
+              {{ icon('down',14) }}
+            </summary>
+            <div>
+              {% if g.teams %}
+                <form method="post" action="{{ url_for('teams.switch') }}" class="team-switch">
+                  {{ csrf() }}<input type="hidden" name="next" value="{{ request.endpoint }}">
+                  {% for team in g.teams %}
+                    <button type="submit" name="team_id" value="{{ team.id }}" aria-pressed="{{ 'true' if g.team and team.id==g.team.id else 'false' }}">
+                      <span>{{ team.name }}</span><small>{{ team.role }}</small>
+                    </button>
+                  {% endfor %}
+                </form>
+              {% endif %}
+              {% if g.user.admin %}
+                <a href="{{ url_for('teams.index') }}">团队管理</a>
+                <a href="{{ url_for('users.accounts') }}">用户账户</a>
+              {% endif %}
+              <a href="/password">修改密码</a>
+              <form method="post" action="/logout">
+                {{ csrf() }}<button>退出登录</button>
+              </form>
+            </div>
+          </details>
+        </div>
+      </aside>
+    {% endif %}
+    <main class="{{'shell' if g.user else 'anon'}}">
+      {% if g.user and not g.team %}<div class="toast" role="status">请联系管理员加入团队。</div>{% endif %}
+      {% with messages=get_flashed_messages() %}
+        {% for msg in messages %}
+          <div class="toast" role="status">{{ msg }}</div>
+        {% endfor %}
+      {% endwith %}
+      {% block content %}{% endblock %}
+    </main>
+  </body>
+</html>

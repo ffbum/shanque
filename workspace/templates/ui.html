@@ -1,0 +1,58 @@
+{% macro icon(name,size=18) -%}
+  <svg class="ico"
+       width="{{ size }}"
+       height="{{ size }}"
+       viewBox="0 0 24 24"
+       fill="none"
+       stroke="currentColor"
+       stroke-width="1.7"
+       stroke-linecap="round"
+       stroke-linejoin="round"
+       aria-hidden="true">
+    <use href="{{ url_for('static',filename='icons.svg') }}#{{ name }}" />
+  </svg>
+{%- endmacro %}
+{% macro brand() %}
+  <img class="brandmark" src="{{ url_for('static', filename='mark.svg') }}" alt=""><strong>山雀</strong>
+{% endmacro %}
+{% macro nav_link(endpoint, label, glyph, current) %}
+  <a href="{{ url_for(endpoint) }}" {% if current %}aria-current="{{ 'page' if request.endpoint == endpoint else 'location' }}"{% endif %}>{{ icon(glyph, 17) }}{{ label }}</a>
+{% endmacro %}
+{% macro stats(items, label) %}
+  <dl class="stats" aria-label="{{ label }}">
+    {% for name, value in items %}<div><dt>{{ name }}</dt><dd>{{ value }}</dd></div>{% endfor %}
+  </dl>
+{% endmacro %}
+{% macro csrf() %}
+  <input type="hidden" name="csrf" value="{{ session.csrf }}">
+  {% if g.user %}<input type="hidden" name="team_context" value="{{ g.team.id if g.team else '' }}">{% endif %}
+{% endmacro %}
+{% macro badge(state) %}
+  <span class="badge {{ {'需关注':'warn','正常推进':'good','已结项':'neutral','受阻':'danger','进行中':'blue','已完成':'good','未开始':'neutral'}.get(state,'neutral') }}"><i></i>{{ state }}</span>
+{% endmacro %}
+{% macro clock(m) %}
+  {% set gap = days(m.planned) %}
+  <span class="clock {{'negative' if gap<0 else ''}}">{{'已逾期 '+(-gap)|string+' 天' if gap<0 else ('今日到期' if gap==0 else '还有 '+gap|string+' 天')}}</span>
+{% endmacro %}
+{% macro deviation(m) %}
+  {% set d = delta(m.forecast,m.planned) if m.forecast else none %}
+  {% if d is not none %}
+    <small class="{{'negative' if d>0}}">{{ '预计晚 '+d|string+' 天' if d>0 else ('预计提前 '+(-d)|string+' 天' if d<0 else '预计按期') }}</small>
+  {% endif %}
+{% endmacro %}
+{% macro selector(name,staff,selected=[]) %}
+  <div class="choices">
+    {% for u in staff if u.role!='总监' %}
+      <label>
+        <input type="checkbox"
+               name="{{ name }}"
+               value="{{ u.id }}"
+               {{'checked' if u.id in selected}}> {{ u.name }}
+      </label>
+    {% endfor %}
+  </div>
+{% endmacro %}
+{% macro back(pid=none) %}
+  <a class="back"
+     href="{{ url_for('work.project',pid=pid) if pid else url_for('work.overview') }}">{{ icon('back', 15) }} {{'项目详情' if pid else '项目总览'}}</a>
+{% endmacro %}

@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}用户账户{% endblock %}
+{% block content %}
+  <div class="page">
+    <div class="pagehead">
+      <div>
+        <h1>用户账户 <span class="count">{{ staff|length }}</span></h1>
+      </div>
+      <div class="toolbar">
+        <button class="btn" data-open="import">Excel 导入</button>
+        <button class="btn primary" data-open="user-new">新增账户</button>
+      </div>
+    </div>
+    <section class="panel">
+      <div class="scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>姓名</th>
+              <th>登录账号</th>
+              <th>账户权限</th>
+              <th>状态</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for u in staff %}
+              <tr>
+                <td>
+                  <b>{{ u.name }}</b>
+                </td>
+                <td>{{ u.login }}</td>
+                <td>{{'管理员' if u.admin else '用户'}}</td>
+                <td>{{'启用' if u.active else '已停用'}}</td>
+                <td>
+                  <button class="textbtn" data-open="user-{{ u.id }}">编辑</button>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+    {% for u in [none]+staff %}
+      <dialog id="user-{{ u.id if u else 'new' }}" aria-labelledby="user-title-{{ u.id if u else 'new' }}">
+        <form method="post" action="/accounts/save">
+          {{ csrf() }}
+          <h2 id="user-title-{{ u.id if u else 'new' }}">{{'编辑账户' if u else '新增账户'}}</h2>
+          {% if u %}
+            <input type="hidden" name="id" value="{{ u.id }}">
+          {% endif %}
+          <label>
+            登录账号<input name="login"
+                       value="{{ u.login if u else '' }}"
+                       required
+                       {{'readonly' if u}}>
+          </label>
+          <label>
+            姓名<input name="name" maxlength="80" value="{{ u.name if u else '' }}" required>
+          </label>
+          <label>
+            {{'重置密码（留空保留当前密码）' if u else '初始密码（至少 8 位）'}}<input type="password"
+                                                                autocomplete="new-password"
+                                                                name="password"
+                                                                minlength="8"
+                                                                {{'required' if not u}}>
+          </label>
+          {% if u %}
+            <label>
+              账号状态<select name="active">
+              <option value="1">启用</option>
+              <option value="0" {{'selected' if not u.active}}>停用</option>
+              </select>
+            </label>
+          {% endif %}
+          <div class="actions">
+            <button type="button" data-dismiss>取消</button>
+            <button class="btn primary">保存</button>
+          </div>
+        </form>
+      </dialog>
+    {% endfor %}
+    <dialog id="import" aria-labelledby="import-title">
+      <form method="post" enctype="multipart/form-data" action="/accounts/import">
+        {{ csrf() }}
+        <h2 id="import-title">批量导入账户</h2>
+        <p>使用模板填写账号、姓名和初始密码，每次最多 500 人。</p>
+        <a class="textbtn" href="/accounts/template.xlsx">下载 Excel 模板</a>
+        <label>
+          选择工作簿<input type="file" name="file" accept=".xlsx" required>
+        </label>
+        <div class="actions">
+          <button type="button" data-dismiss>取消</button>
+          <button class="btn primary">导入人员</button>
+        </div>
+      </form>
+    </dialog>
+  </div>
+{% endblock %}

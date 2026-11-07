@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}操作提示{% endblock %}
+{% block content %}
+  <div class="page">
+    <div class="paper">
+      <h1>操作提示</h1>
+      <p>{{ error.description }}</p>
+      {% if g.conflict_project %}<a class="btn primary" href="{{ url_for('work.project', pid=g.conflict_project, team=g.conflict_team|default(none)) }}">查看最新任务</a>{% endif %}
+      <a class="btn" href="/">返回项目总览</a>
+    </div>
+  </div>
+{% endblock %}

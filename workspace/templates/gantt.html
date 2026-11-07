@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+{% from 'ui.html' import icon,badge,stats with context %}
+{% block title %}项目甘特图{% endblock %}
+{% block assets %}
+  <link rel="stylesheet" href="{{ url_for('static',filename='timeline.css') }}">
+  <script defer src="{{ url_for('static',filename='timeline.js') }}"></script>
+{% endblock %}
+{% macro grid() %}
+  <i class="tl-nowline"></i>
+{% endmacro %}
+{% macro task_rows(tasks, group_id, node=none) %}
+  <div id="{{ group_id }}" class="tl-task-list">
+    {% for t in tasks %}
+      {% set people = t.assignees|map(attribute='name')|join('、') %}
+      {% set tip %}{{ t.name }} · {{ t.status }}
+待办人：{{ people }}　开始：{{ t.start_date or '待补充' }}　截止：{{ t.due }}{% if node %}
+节点计划：{{ node.planned }}{% endif %}{% if t.note %}
+进展说明：{{ t.note }}{% endif %}{% if t.done_at %}
+完成记录：{{ t.finisher }} · {{ t.done_at[:10] }}{% endif %}{% endset %}
+      <div class="tl-row tl-task-row" data-task-id="{{ t.id }}" title="{{ tip|trim }}">
+        <div class="tl-name"><span>{{ t.name }}{% if t.is_key %} <span class="tag">节点任务</span>{% endif %}</span><small>{{ people }}</small></div>
+        <div class="tl-lane" aria-label="截止 {{ t.due }}{% if node %}，节点计划 {{ node.planned }}{% endif %}">
+          {{ grid() }}
+          {% if t.start_x is not none %}
+            <i class="tl-duration task-duration" style="left:{{ t.start_x }}px;width:{{ t.due_x-t.start_x }}px"></i>
+          {% endif %}
+          {% if node %}
+            <i class="tl-plan tl-task-baseline" style="left:{{ node.plan_x }}px"></i>
+          {% endif %}
+          <i class="tl-due" style="left:{{ t.due_x }}px"></i>
+          <time class="tl-due-date" style="--due:{{ t.due_x }}px" datetime="{{ t.due }}">{{ t.due }}</time>
+        </div>
+        <div class="tl-result">{{ badge(t.status) }}</div>
+      </div>
+    {% endfor %}
+  </div>
+{% endmacro %}
+{% block content %}
+  <div class="page tl-page">
+    <div class="pagehead"><h1>项目甘特图 <span class="count">{{ projects|length }} 个项目</span></h1></div>
+
+    {{ stats([
+      ('已达成节点', chart.counts.done ~ ' / ' ~ chart.counts.total),
+      ('逾期或预计延期', chart.counts.risk),
+      ('7 天内到期节点', chart.counts.upcoming)
+    ], '节点概况') }}
+    <section class="panel tl-panel" style="--today:{{ chart.today_x }}px;--axis-width:{{ chart.width }}px;--day:{{ chart.day_width }}px">
+      <header class="panelhead">
+        <div class="tl-range"><small>{{ chart.start }} — <time id="tl-axis-end">{{ chart.stop }}</time></small></div>
+        <div class="tl-controls">
+          <select id="tl-project" aria-label="选择项目"><option value="">全部项目</option>
+            {% for p in projects %}<option value="{{ p.id }}">{{ p.name }}</option>{% endfor %}
+          </select>
+          <label><input type="checkbox" id="tl-risk">只看风险节点</label>
+          <button type="button" class="btn sm" id="tl-fold">全部收起</button>
+          <button type="button" class="btn sm" id="tl-locate">定位今天</button>
+        </div>
+      </header>
+      <div class="tl-scroll" role="region" aria-label="项目节点甘特图" tabindex="0">
+        <div class="tl-chart">
+          <div class="tl-row tl-axis">
+            <div class="tl-name">项目 / 节点 / 任务</div>
+            <div class="tl-lane" data-start="{{ chart.start }}" data-day-width="{{ chart.day_width }}" title="左右拖动日期栏查看其他日期">
+              <div class="tl-ticks" aria-hidden="true"></div>
+              <span class="tl-today">今天</span>
+            </div>
+            <div class="tl-result">进展 / 状态</div>
+          </div>
+          {% for p in projects %}
+            <section class="tl-group" data-project-id="{{ p.id }}">
+              <div class="tl-row tl-project-row">
+                <div class="tl-name"><button type="button" class="tl-toggle" aria-expanded="true"
+                     aria-controls="tl-nodes-{{ p.id }}">{{ icon('down',14) }}<b>{{ p.name }}</b></button>
+                  <small>{{ p.leads|map(attribute='name')|join('、') or '待指定负责人' }} · <a href="/projects/{{ p.id }}">项目详情</a></small>
+                  <small>{{ p.start_date ~ ' 至 ' ~ p.end_date if p.start_date else '项目起止待补' }}</small>
+                </div>
+                <div class="tl-lane" title="{{ p.start_date ~ ' 至 ' ~ p.end_date if p.start_date else '待补充项目起止日期' }}">
+                  {{ grid() }}
+                  {% if p.start_date %}<i class="tl-span" style="left:{{ p.left }}px;width:{{ p.width }}px"></i>{% endif %}
+                  {% for m in p.milestones %}
+                    <i class="tl-pin {{ m.state }}" title="{{ m.name }} · 计划 {{ m.planned }} · {{ m.label }}" style="left:{{ m.plan_x }}px"></i>
+                  {% endfor %}
+                </div>
+                <div class="tl-result">{{ badge(p.state) }}
+                  <small>节点 {{ p.reached }}/{{ p.milestones|length }} · 任务 {{ p.done }}/{{ p.tasks|length }}</small>
+                </div>
+              </div>
+              <div id="tl-nodes-{{ p.id }}" class="tl-nodes">
+                {% for m in p.milestones %}
+                  <section class="tl-branch" data-state="{{ m.state }}">
+                  {% set node_tip %}{{ m.name }} · {{ m.label }}
+阶段开始：{{ m.stage_start or '待补充项目开始日期' }}　计划：{{ m.planned }}{% if m.forecast %}　预计：{{ m.forecast }}{% endif %}{% if m.achieved %}
+实际：{{ m.achieved[:10] }} · {{ m.actor_name }}{% endif %}
+未完任务：{{ m.remaining|length }} / {{ m.tasks|length }}{% endset %}
+                  <div class="tl-row tl-node {{ m.state }}" title="{{ node_tip|trim }}">
+                    <div class="tl-name">
+                      {% if m.tasks %}<button type="button" class="tl-branch-toggle" aria-expanded="true"
+                        aria-controls="tl-tasks-{{ m.id }}">{{ icon('down',13) }}{{ m.name }} <small>{{ m.tasks|length }}</small></button>
+                      {% else %}<b class="tl-leaf">{{ m.name }}</b>{% endif %}
+                    </div>
+                    <div class="tl-lane" {% if m.tasks %}data-toggle-branch="tl-tasks-{{ m.id }}"{% endif %}>
+                      {{ grid() }}
+                      {% if m.stage_x is not none %}
+                        <i class="tl-duration stage-duration" style="left:{{ m.stage_x }}px;width:{{ m.plan_x-m.stage_x }}px"></i>
+                      {% endif %}
+                      {% if m.width %}<i class="tl-connector" style="left:{{ m.left }}px;width:{{ m.width }}px"></i>{% endif %}
+                      <i class="tl-plan" style="left:{{ m.plan_x }}px"></i>
+                      {% if m.forecast %}<i class="tl-forecast" style="left:{{ m.forecast_x }}px"></i>{% endif %}
+                      {% if m.achieved %}<i class="tl-actual" style="left:{{ m.actual_x }}px"></i>{% endif %}
+                      <span class="tl-date" style="left:{{ m.plan_x }}px">{{ m.planned[5:]|replace('-','/') }}</span>
+                    </div>
+                    <div class="tl-result"><b>{{ m.label }}</b>
+                      {% if m.achieved %}<small>实际 {{ m.achieved[5:10] }}</small>
+                      {% elif m.forecast %}<small>预计 {{ m.forecast[5:] }}</small>{% endif %}
+                    </div>
+                  </div>
+                  {{ task_rows(m.tasks, 'tl-tasks-' ~ m.id, m) }}
+                  </section>
+                {% else %}
+                  <div class="tl-no-nodes">尚未设置关键节点</div>
+                {% endfor %}
+                {% if p.unlinked %}
+                  <section class="tl-branch" data-state="unlinked">
+                    <div class="tl-row tl-node"><div class="tl-name">
+                      <button class="tl-branch-toggle" type="button" aria-expanded="true"
+                        aria-controls="tl-unlinked-{{ p.id }}">{{ icon('down',13) }}未关联节点 <small>{{ p.unlinked|length }}</small></button>
+                    </div><div class="tl-lane">{{ grid() }}</div><div class="tl-result"></div></div>
+                    {{ task_rows(p.unlinked, 'tl-unlinked-' ~ p.id) }}
+                  </section>
+                {% endif %}
+              </div>
+            </section>
+          {% endfor %}
+        </div>
+        <p id="tl-empty" class="empty" {{ 'hidden' if projects }}>暂无符合条件的项目或节点</p>
+      </div>
+      <footer class="tl-legend" aria-label="图例">
+        <span><i class="tl-plan"></i>计划日</span>
+        <span><i class="tl-due"></i>任务截止日</span>
+        <span><i class="tl-forecast"></i>预计日</span>
+        <span><i class="tl-actual"></i>实际达成日</span>
+        <span><i class="tl-legend-span"></i>项目工期</span>
+        <span><i class="stage-duration"></i>节点阶段</span>
+        <span><i class="task-duration"></i>任务工期</span>
+      </footer>
+    </section>
+  </div>
+{% endblock %}

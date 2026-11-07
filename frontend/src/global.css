@@ -1,0 +1,980 @@
+:root {
+  font-family: Inter, "Segoe UI", "Microsoft YaHei", sans-serif;
+  color: #1f2329;
+  background: #f5f7f4;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+}
+.ant-pro-layout .ant-pro-layout-content {
+  padding: 24px;
+}
+.ant-pro-page-container-children-container {
+  padding-inline: 0;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: inherit;
+}
+.brand-mark {
+  background: #176951;
+  color: white;
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-size: 17px;
+}
+.account-footer {
+  padding: 8px 0;
+  border-top: 1px solid #ffffff20;
+}
+.account-button {
+  color: #e3eee7;
+  width: 100%;
+  height: 62px;
+  display: flex;
+  text-align: left;
+}
+.account-copy {
+  flex: 1;
+  min-width: 0;
+}
+.account-button > span:last-child:not(.ant-avatar) {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+  gap: 10px;
+}
+.account-button strong,
+.account-button small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.account-button small {
+  color: #b6cabe;
+  font-weight: 400;
+  margin-top: 3px;
+}
+.metrics {
+  margin-bottom: 24px;
+}
+.metrics .ant-card-body {
+  padding: 20px 24px;
+}
+.section-card {
+  margin-bottom: 24px;
+  margin-top: 16px;
+}
+.muted {
+  color: #8c8c8c;
+  font-size: 12px;
+}
+.late {
+  color: #b34b48;
+  font-size: 12px;
+}
+.success {
+  color: #39765b;
+}
+.wrap-text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  margin: 0 0 6px;
+}
+.text-link {
+  padding: 0;
+  height: auto;
+  white-space: normal;
+  text-align: left;
+}
+.project-cell strong {
+  font-size: 14px;
+}
+.project-name-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.project-type-icon {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  font-size: 15px;
+  line-height: 1;
+}
+.project-type-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.gantt-title > .project-type-icon {
+  margin-right: 6px;
+}
+.project-name-line strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.project-name-line .ant-btn {
+  flex-shrink: 0;
+  color: #8c8c8c;
+}
+.task-completion {
+  font-variant-numeric: tabular-nums;
+}
+.ledger-task-name {
+  display: inline-block;
+  width: 100%;
+  vertical-align: top;
+}
+.ledger-task-name .muted {
+  margin-top: 6px;
+}
+.ledger-project-row > td {
+  background: #fafafa;
+}
+.ledger-project-row .project-cell {
+  display: inline-block;
+  width: 100%;
+  vertical-align: middle;
+}
+.ant-table-tbody > tr.ledger-project-row > td.ant-table-cell:first-child,
+.ant-table-tbody > tr.ledger-task-row > td.ant-table-cell:first-child {
+  position: relative;
+  padding-left: 40px;
+}
+.ant-table-tbody > tr.ledger-task-row > td.ant-table-cell:first-child {
+  padding-left: 64px;
+}
+.ledger-project-row .ant-table-row-indent,
+.ledger-task-row .ant-table-row-indent {
+  display: none;
+}
+.ledger-project-row .ant-table-row-expand-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  margin: 0;
+  transform: translateY(-50%);
+}
+.ledger-task-row .ant-table-row-expand-icon-spaced {
+  display: none;
+}
+.project-cell .muted {
+  margin: 8px 0;
+}
+.completion {
+  margin-top: 8px;
+}
+.milestone-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 4px 0;
+}
+.milestone-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.milestone-line > .muted,
+.milestone-line > .late {
+  white-space: nowrap;
+}
+.milestone-name {
+  flex: 1;
+  min-width: 0;
+}
+.milestone-name > span {
+  display: block;
+}
+.milestone-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #176951;
+  flex-shrink: 0;
+}
+.milestone-dot.done {
+  background: #39765b;
+}
+.milestone-dot.danger {
+  background: #b34b48;
+}
+.overview-ledger .ant-table-tbody > tr > td.ant-table-cell {
+  padding-top: 6px;
+  padding-bottom: 6px;
+  font-size: 13px;
+  line-height: 18px;
+}
+.overview-ledger .ant-table-tbody > tr.ledger-project-row > td.ant-table-cell {
+  background: #edf4ef;
+  border-top: 1px solid #d5e5da;
+  border-bottom: 1px solid #d5e5da;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+.overview-ledger
+  .ant-table-tbody
+  > tr.ledger-project-row
+  > td.ant-table-cell:first-child {
+  box-shadow: inset 3px 0 #83b49c;
+}
+.overview-ledger .ant-table-tbody > tr.ledger-task-row > td.ant-table-cell {
+  background: #fff;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  line-height: 18px;
+}
+.overview-ledger
+  .ant-table-tbody
+  > tr.ledger-task-row:hover
+  > td.ant-table-cell {
+  background: #f7faf7;
+}
+.overview-ledger .project-cell .muted,
+.overview-ledger .ledger-task-name .muted {
+  margin: 2px 0 0;
+}
+.overview-ledger .completion {
+  margin-top: 2px;
+}
+.overview-ledger .milestone-stack {
+  gap: 4px;
+  padding: 0;
+}
+.overview-ledger .wrap-text {
+  margin-bottom: 2px;
+}
+.overview-ledger .ant-btn-link {
+  font-size: 13px;
+  line-height: 18px;
+  height: auto;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+.overview-ledger .ant-progress {
+  line-height: 1;
+  margin: 2px 0;
+}
+.overview-ledger .ledger-progress {
+  display: grid;
+  grid-template-rows: 24px 12px 18px;
+  align-items: center;
+  height: 54px;
+}
+.ledger-progress-heading {
+  display: flex;
+  align-items: center;
+  height: 24px;
+}
+.ledger-task-dates {
+  font-variant-numeric: tabular-nums;
+}
+.ledger-task-dates .task-date-due {
+  color: #1f2329;
+}
+.ledger-task-dates .task-date-done {
+  color: #39765b;
+}
+.ledger-task-dates .task-date-overdue {
+  color: #b34b48;
+}
+.ledger-task-dates > div {
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  column-gap: 6px;
+  white-space: nowrap;
+  line-height: 20px;
+}
+.overview-ledger .milestone-line {
+  gap: 6px;
+}
+.overview-ledger .node-done {
+  color: #39765b;
+}
+.overview-ledger .node-overdue {
+  color: #b34b48;
+}
+.overview-ledger .node-pending {
+  color: #1f2329;
+}
+.overview-ledger .ledger-node .muted,
+.overview-ledger .ledger-node .late {
+  color: inherit;
+}
+.overview-ledger .ledger-node .milestone-dot {
+  background: currentColor;
+}
+.key-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  transform: rotate(45deg);
+  margin-left: 8px;
+  background: #176951;
+}
+.form-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 24px;
+}
+.form-actions > .ant-popover-open:first-child {
+  margin-right: auto;
+}
+.form-error {
+  margin-bottom: 16px;
+}
+.date-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.date-pair .ant-picker {
+  width: 100%;
+}
+.task-calendar {
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+  margin-top: 12px;
+}
+.node-day {
+  display: block;
+  color: #176951;
+  font-size: 10px;
+  line-height: 14px;
+}
+.project-summary {
+  display: flex;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+.project-summary p {
+  margin: 8px 0;
+}
+.progress-copy {
+  flex: 1;
+  min-width: 200px;
+}
+.member-list > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #f0f0f0;
+  padding: 12px 0;
+}
+.page-loading {
+  min-height: 50vh;
+  display: grid;
+  place-items: center;
+}
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: #ffffffa0;
+  z-index: 1100;
+}
+.auth-card {
+  width: 100%;
+  max-width: 390px;
+}
+.login-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  background: #f5f7f4;
+  padding: 24px;
+}
+.login-panel {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  width: min(920px, 100%);
+  min-height: 500px;
+  overflow: hidden;
+  border: 1px solid #dde5e1;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 20px 65px #2547350d;
+}
+.login-brand {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 42px;
+  background: #142f2c;
+  color: #fff;
+}
+.login-wordmark {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.login-wordmark strong {
+  font-size: 27px;
+  letter-spacing: 2px;
+}
+.login-mark {
+  display: block;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+}
+.login-wordmark .login-mark {
+  width: 52px;
+  height: 52px;
+}
+.ant-pro-layout .ant-pro-sider-logo a > img.login-mark {
+  width: 44px;
+  height: 44px;
+  max-height: none;
+}
+.login-intro h2 {
+  margin: 52px 0 32px;
+  color: #fff;
+  font-size: 32px;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+.login-timeline {
+  height: 170px;
+  position: relative;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 35px, #ffffff0c 35px 36px),
+    repeating-linear-gradient(0deg, transparent 0 27px, #ffffff0c 27px 28px);
+}
+.login-timeline i {
+  position: absolute;
+  left: 0;
+  top: 16px;
+  width: 26%;
+  height: 9px;
+  border-radius: 8px;
+  background: #b7d9a9;
+}
+.login-timeline i:nth-child(2) {
+  top: 44px;
+  left: 20%;
+  width: 45%;
+  background: #78a891;
+}
+.login-timeline i:nth-child(3) {
+  top: 72px;
+  left: 33%;
+  width: 27%;
+}
+.login-timeline i:nth-child(4) {
+  top: 100px;
+  left: 42%;
+  width: 44%;
+  background: #78a891;
+}
+.login-timeline i:nth-child(5) {
+  top: 128px;
+  left: 65%;
+  width: 18%;
+}
+.login-timeline i:nth-child(6) {
+  top: 156px;
+  left: 79%;
+  width: 21%;
+  background: #78a891;
+}
+.login-fields {
+  display: flex;
+  align-items: center;
+  padding: 52px;
+  min-width: 0;
+}
+.login-fields .auth-card {
+  border: 0;
+  box-shadow: none;
+  background: transparent;
+}
+.login-fields .ant-card-body {
+  padding: 0;
+}
+.login-demo {
+  margin-top: 24px;
+  padding-top: 18px;
+  border-top: 1px solid #e8ede9;
+  color: #6d7a78;
+  font-size: 12px;
+}
+.login-demo summary {
+  cursor: pointer;
+}
+.login-demo p {
+  margin: 10px 0 0;
+  line-height: 2;
+}
+.login-demo code {
+  color: #36554b;
+}
+.login-heading {
+  margin: 0 0 32px;
+  font-size: 25px;
+  font-weight: 600;
+  color: #1d302e;
+}
+.login-fields .ant-input,
+.login-fields .ant-input-affix-wrapper {
+  min-height: 42px;
+}
+.login-fields .ant-input-affix-wrapper .ant-input {
+  min-height: 0;
+}
+.login-fields .ant-input:focus,
+.login-fields .ant-input-affix-wrapper-focused {
+  border-color: #176951;
+  box-shadow: 0 0 0 2px #17695118;
+}
+.login-fields .ant-input:hover,
+.login-fields .ant-input-affix-wrapper:hover {
+  border-color: #176951;
+}
+.login-fields .ant-btn-primary {
+  height: 44px;
+  margin-top: 8px;
+  background: #176951;
+  box-shadow: none;
+}
+.login-fields .ant-btn-primary:not(:disabled):hover {
+  background: #248366;
+}
+@media (max-width: 640px) {
+  .login-page {
+    padding: 20px;
+  }
+  .login-panel {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+  .login-brand {
+    padding: 24px 28px;
+  }
+  .login-wordmark strong {
+    font-size: 23px;
+  }
+  .login-intro {
+    display: none;
+  }
+  .login-fields {
+    padding: 36px 28px 40px;
+  }
+  .login-heading {
+    font-size: 23px;
+    margin-bottom: 28px;
+  }
+}
+.gantt-card .ant-card-body {
+  padding: 0;
+}
+.gantt-card .ant-card-head {
+  padding: 16px 20px;
+}
+.gantt-scroll {
+  overflow: auto;
+  max-height: calc(100vh - 280px);
+  min-height: 300px;
+  position: relative;
+  border-top: 1px solid #f0f0f0;
+  overscroll-behavior: contain;
+}
+.gantt-sheet {
+  position: relative;
+}
+.gantt-header {
+  display: flex;
+  height: 48px;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: #fafafa;
+  border-bottom: 1px solid #e8e8e8;
+}
+.gantt-label {
+  position: sticky;
+  left: 0;
+  width: 330px;
+  flex: 0 0 330px;
+  z-index: 3;
+  background: #fff;
+  padding: 3px 12px;
+  border-right: 1px solid #e8e8e8;
+  overflow: hidden;
+}
+.header-label {
+  background: #fafafa;
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  z-index: 6;
+}
+.gantt-axis {
+  position: relative;
+  flex-shrink: 0;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+.gantt-axis:active {
+  cursor: grabbing;
+}
+.axis-date {
+  position: absolute;
+  height: 48px;
+  text-align: center;
+  border-right: 1px solid #f0f0f0;
+  font-size: 11px;
+}
+.axis-date span {
+  display: block;
+  height: 24px;
+  white-space: nowrap;
+  text-align: left;
+  padding-left: 3px;
+  position: relative;
+  z-index: 1;
+  color: #595959;
+}
+.axis-date b {
+  display: block;
+  font-weight: 400;
+  color: #8c8c8c;
+}
+.axis-date.weekend {
+  background: #f0f0f0;
+}
+.gantt-row {
+  height: 44px;
+  display: flex;
+  border-bottom: 1px solid #f0f0f0;
+}
+.gantt-row.project {
+  height: 52px;
+  background: #edf4ef;
+  border-bottom-color: #d5e5da;
+}
+.gantt-row.project > .gantt-label {
+  background: #edf4ef;
+  padding-top: 7px;
+  box-shadow: inset 3px 0 #83b49c;
+}
+.gantt-row.milestone {
+  height: 46px;
+  background: #fafafa;
+}
+.gantt-row.milestone .gantt-label {
+  padding-left: 24px;
+  background: #fafafa;
+}
+.gantt-row.task .gantt-label {
+  padding-left: 52px;
+}
+.gantt-title {
+  display: flex;
+  align-items: center;
+  height: 20px;
+  font-size: 13px;
+  line-height: 20px;
+}
+.gantt-name {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  flex: 1;
+}
+.gantt-row.project .gantt-name {
+  font-weight: 600;
+  font-size: 14px;
+}
+.gantt-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: #8c8c8c;
+  margin-top: 0;
+  height: 18px;
+  line-height: 18px;
+  white-space: nowrap;
+}
+.gantt-meta > span:first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 85px;
+}
+.gantt-meta .ant-tag {
+  font-size: 11px;
+  line-height: 18px;
+  margin: 0;
+}
+.gantt-track {
+  position: relative;
+  flex-shrink: 0;
+  background-image: linear-gradient(to right, #f0f0f0 1px, transparent 1px);
+}
+.gantt-bar {
+  position: absolute;
+  height: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-radius: 5px;
+  background: #83b49c;
+  min-width: 6px;
+}
+.gantt-bar.done {
+  background: #a8c6b3;
+}
+.gantt-bar.danger {
+  background: #dfb3ae;
+}
+.project .gantt-bar {
+  height: 18px;
+  top: 50%;
+  background: #b2bdb7;
+  box-shadow:
+    inset 0 1px #8b9b92,
+    inset 0 -1px #8b9b92;
+  border-radius: 0;
+}
+.project-progress-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: #8db49e;
+}
+.project .gantt-bar::before,
+.project .gantt-bar::after {
+  content: "";
+  position: absolute;
+  width: 3px;
+  height: 22px;
+  top: 0;
+  background: #595959;
+  z-index: 1;
+}
+.project .gantt-bar::before {
+  left: 0;
+}
+.project .gantt-bar::after {
+  right: 0;
+}
+.project .gantt-bar span {
+  position: sticky;
+  left: 340px;
+  top: 0;
+  font-size: 11px;
+  line-height: 18px;
+  color: #1f2329;
+  padding: 0 6px;
+  white-space: nowrap;
+}
+.milestone .gantt-bar {
+  height: 0;
+  top: 50%;
+  border-top: 2px dashed var(--node-color);
+  border-radius: 0;
+  background: transparent;
+}
+.gantt-row.milestone {
+  --node-color: #1f2329;
+}
+.gantt-row.milestone.is-done {
+  --node-color: #39765b;
+}
+.gantt-row.milestone.is-overdue {
+  --node-color: #b34b48;
+}
+.gantt-row.milestone .gantt-name,
+.gantt-row.milestone .gantt-meta {
+  color: var(--node-color);
+}
+.gantt-diamond {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  top: 50%;
+  transform: translate(-50%, -50%) rotate(45deg);
+  background: var(--node-color, #1f2329);
+  box-shadow: 0 0 0 2px #fff;
+}
+.forecast-mark {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 24px;
+  border-left: 2px dashed #a77932;
+}
+.actual-mark {
+  position: absolute;
+  top: 50%;
+  color: #39765b;
+  font-size: 20px;
+  transform: translate(-50%, -50%);
+}
+.task-end {
+  position: absolute;
+  height: 14px;
+  border-right: 2px solid #176951;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.task.is-done .task-end {
+  border-color: #39765b;
+}
+.task.is-overdue .task-end {
+  border-color: #b34b48;
+}
+.today-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-left: 1px solid #b34b48;
+  z-index: 1;
+  pointer-events: none;
+}
+.gantt-legend {
+  display: flex;
+  gap: 20px;
+  padding: 12px 20px;
+  font-size: 12px;
+  color: #8c8c8c;
+  flex-wrap: wrap;
+}
+.gantt-legend i {
+  display: inline-block;
+  margin-right: 4px;
+}
+.legend-line {
+  width: 20px;
+  height: 6px;
+  border-radius: 3px;
+  background: #83b49c;
+}
+.legend-diamond {
+  width: 7px;
+  height: 7px;
+  transform: rotate(45deg);
+  background: #1f2329;
+}
+.legend-project {
+  background: #b2bdb7;
+  width: 20px;
+  height: 9px;
+  border-top: 4px solid #595959;
+  border-left: 2px solid #595959;
+  border-right: 2px solid #595959;
+}
+.legend-project-done {
+  width: 20px;
+  height: 8px;
+  background: #8db49e;
+}
+.legend-node {
+  width: 20px;
+  height: 4px;
+  border-top: 2px dashed #1f2329;
+}
+.legend-forecast {
+  height: 10px;
+  border-left: 2px dashed #a77932;
+}
+@media (max-width: 767px) {
+  .ant-pro-layout .ant-pro-layout-content {
+    padding: 12px;
+  }
+  .project-summary {
+    gap: 20px;
+  }
+  .metrics {
+    margin-bottom: 16px;
+  }
+  .gantt-card .ant-card-head-wrapper {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .gantt-scroll {
+    max-height: 70vh;
+  }
+}
+
+.account-button.ant-btn:hover {
+  color: #fff;
+  background: #ffffff12;
+}
+
+.page-title-with-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.page-title-with-icon > .anticon {
+  font-size: 22px;
+  color: #176951;
+}
+
+.ant-app .ant-tag.status-completed.status-completed {
+  color: #f5faf6;
+  background: #39765b;
+  border-color: #39765b;
+}
+
+.ant-tag.team-role-tag.team-role-tag {
+  border: 1px solid transparent;
+}
+.ant-tag.team-role-tag.team-role-manager {
+  color: #214e3b;
+  background: #b8d2bf;
+  border-color: #99bba4;
+}
+.ant-tag.team-role-tag.team-role-director {
+  color: #f5faf6;
+  background: #214e40;
+  border-color: #214e40;
+}
+.ant-tag.team-role-tag.team-role-member {
+  color: #64736a;
+  background: #f1f4f1;
+  border-color: #e0e7e1;
+}
+
+.ledger-status-cell .ant-tag {
+  width: 76px;
+  text-align: center;
+  margin-inline-end: 0;
+}
+.ant-app .ant-tag.status-progress.status-progress {
+  color: #f5faf6;
+  background: #176951;
+  border-color: #176951;
+}
+
+.ledger-updates-cell .ant-btn-link:not(:disabled) > span {
+  text-decoration-line: underline;
+  text-decoration-style: dashed;
+  text-decoration-color: #78a891;
+  text-underline-offset: 4px;
+}
+.ledger-updates-cell .ant-btn-link:not(:disabled):hover {
+  background: #e5eee7;
+}
+.ledger-updates-cell .ant-btn-link:not(:disabled):hover > span {
+  text-decoration-style: solid;
+  text-decoration-color: currentColor;
+}
+.ledger-updates-cell .ant-btn-link:focus-visible {
+  outline: 2px solid #39765b;
+  outline-offset: 1px;
+}

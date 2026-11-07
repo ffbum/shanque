@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}团队管理{% endblock %}
+{% block content %}
+<div class="page">
+  <div class="pagehead">
+    <h1>团队管理 <span class="count">{{ teams|length }}</span></h1>
+    <button class="btn primary" data-open="team-new">新建团队</button>
+  </div>
+  <section class="panel">
+    <table>
+      <thead><tr><th>团队</th><th>人员</th><th>项目</th></tr></thead>
+      <tbody>{% for team in teams %}
+        <tr><td><a class="task-name" href="{{ url_for('teams.detail',tid=team.id) }}">{{ team.name }}</a></td>
+          <td>{{ team.members }}</td><td>{{ team.projects }}</td></tr>
+      {% endfor %}</tbody>
+    </table>
+  </section>
+  <dialog id="team-new" aria-labelledby="team-new-title">
+    <form method="post" action="{{ url_for('teams.save') }}">
+      {{ csrf() }}
+      <h2 id="team-new-title">新建团队</h2>
+      <label>团队名称<input name="name" maxlength="80" required autofocus></label>
+      <label>团队主管<select name="supervisor" required>
+        {% for u in staff %}<option value="{{ u.id }}" {{ 'selected' if u.id==g.user.id }}>{{ u.name }}（{{ u.login }}）</option>{% endfor %}
+      </select></label>
+      <div class="actions"><button type="button" data-dismiss>取消</button><button class="btn primary">创建团队</button></div>
+    </form>
+  </dialog>
+</div>
+{% endblock %}

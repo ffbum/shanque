@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% from 'ui.html' import back with context %}
+{% block title %}{{ '编辑任务' if item else '布置任务' }}{% endblock %}
+{% block content %}
+  <div class="page">
+    {{ back(p.id) }}
+    <div class="paper">{% include 'task_form.html' %}</div>
+  </div>
+{% endblock %}

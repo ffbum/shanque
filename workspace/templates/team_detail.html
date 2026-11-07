@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}{{ team.name }} · 团队管理{% endblock %}
+{% block content %}
+<div class="page">
+  <a class="back" href="{{ url_for('teams.index') }}">{{ icon('back',15) }}团队管理</a>
+  <div class="pagehead"><h1>{{ team.name }}</h1><button class="btn" data-open="rename-team">修改名称</button></div>
+  {% with member_source='team-admin' %}{% include "team_people.html" %}{% endwith %}
+  <section class="panel space">
+    <div class="panelhead"><h2>团队项目 <span class="count">{{ projects|length }}</span></h2>
+      <button class="btn sm" data-open="link-project">关联已有项目</button></div>
+    <table><thead><tr><th>项目</th><th>操作</th></tr></thead><tbody>
+      {% for p in projects %}<tr><td>{{ p.name }}</td><td>
+        <form method="post" action="{{ url_for('teams.link_project',tid=team.id) }}">
+          {{ csrf() }}<input type="hidden" name="project_id" value="{{ p.id }}">
+          <button class="textbtn" name="remove" value="1" data-confirm="将{{ p.name }}移出此团队？">移出团队</button>
+        </form>
+      </td></tr>{% else %}<tr><td colspan="2" class="empty">暂无项目</td></tr>{% endfor %}
+    </tbody></table>
+  </section>
+  <dialog id="rename-team" aria-labelledby="rename-team-title">
+    <form method="post" action="{{ url_for('teams.save') }}">
+      {{ csrf() }}<input type="hidden" name="id" value="{{ team.id }}">
+      <h2 id="rename-team-title">修改团队名称</h2>
+      <label>团队名称<input name="name" maxlength="80" required value="{{ team.name }}"></label>
+      <div class="actions"><button type="button" data-dismiss>取消</button><button class="btn primary">保存名称</button></div>
+    </form>
+  </dialog>
+  <dialog id="link-project" aria-labelledby="link-project-title">
+    <form method="post" action="{{ url_for('teams.link_project',tid=team.id) }}">
+      {{ csrf() }}<h2 id="link-project-title">关联已有项目</h2>
+      <label>项目<select name="project_id" required><option value="">选择项目</option>
+        {% for p in available_projects %}<option value="{{ p.id }}">{{ p.name }}</option>{% endfor %}
+      </select></label>
+      <div class="actions"><button type="button" data-dismiss>取消</button><button class="btn primary" {{ 'disabled' if not available_projects }}>关联项目</button></div>
+    </form>
+  </dialog>
+</div>
+{% endblock %}

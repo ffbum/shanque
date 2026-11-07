@@ -1,0 +1,15 @@
+Shanque Enterprise Project Workbench
+山雀企业项目工作台
+Copyright 2026 Shanque contributors
+
+Original project code and documentation are licensed under Apache License 2.0.
+Third-party materials retain their respective licenses and copyright notices.
+
+This project includes material derived from Ant Design Pro v6.0.3:
+https://github.com/ant-design/ant-design-pro
+Copyright (c) 2019-present Alipay.inc
+Licensed under the MIT License. The complete original notice and license are
+preserved in frontend/LICENSE.
+
+The frontend has been adapted for Shanque, including application pages,
+backend integration, team workflows, branding, and visual design.

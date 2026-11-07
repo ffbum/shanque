@@ -1,0 +1,45 @@
+<section class="panel">
+  <div class="panelhead">
+    <h2>团队人员 <span class="count">{{ staff|length }}</span></h2>
+    {% if can_manage %}<button class="btn sm primary" data-open="add-team-member">添加人员</button>{% endif %}
+  </div>
+  <div class="scroll">
+    <table class="team-people-table">
+      <thead><tr><th>姓名</th><th>登录账号</th><th>团队角色</th><th>状态</th>{% if can_manage %}<th>操作</th>{% endif %}</tr></thead>
+      <tbody>{% for u in staff %}
+        <tr><td>{{ u.name }}</td><td>{{ u.login }}</td><td>
+          {% if g.user.admin %}
+            <form method="post" class="role-form" action="{{ url_for('teams.save_member',tid=team.id) }}">
+              {{ csrf() }}<input type="hidden" name="person_id" value="{{ u.id }}"><input type="hidden" name="source" value="{{ member_source }}">
+              <select name="role" aria-label="{{ u.name }}的团队角色" {{ 'disabled' if not u.active }}>
+                {% for role in roles %}<option {{ 'selected' if role==u.role }}>{{ role }}</option>{% endfor %}
+              </select>
+              <button class="btn sm" {{ 'disabled' if not u.active }}>保存角色</button>
+            </form>
+          {% else %}{{ u.role }}{% endif %}
+        </td><td>{{ '启用' if u.active else '已停用' }}</td>
+        {% if can_manage %}<td>{% if g.user.admin or u.role=='成员' %}
+          <form method="post" action="{{ url_for('teams.save_member',tid=team.id) }}">
+            {{ csrf() }}<input type="hidden" name="person_id" value="{{ u.id }}"><input type="hidden" name="source" value="{{ member_source }}">
+            <button class="textbtn" name="remove" value="1" data-confirm="将{{ u.name }}移出{{ team.name }}？">移出团队</button>
+          </form>
+        {% endif %}</td>{% endif %}</tr>
+      {% endfor %}</tbody>
+    </table>
+  </div>
+</section>
+{% if can_manage %}
+<dialog id="add-team-member" aria-labelledby="add-member-title">
+  <form method="post" action="{{ url_for('teams.save_member',tid=team.id) }}">
+    {{ csrf() }}<input type="hidden" name="source" value="{{ member_source }}">
+    <h2 id="add-member-title">添加团队人员</h2>
+    <label>用户账户<select name="person_id" required>
+      <option value="">选择账户</option>
+      {% for u in available %}<option value="{{ u.id }}">{{ u.name }}（{{ u.login }}）</option>{% endfor %}
+    </select></label>
+    {% if g.user.admin %}<label>团队角色<select name="role">{% for role in roles %}<option>{{ role }}</option>{% endfor %}</select></label>{% endif %}
+    {% if not available %}<p>全部启用账户已在此团队。</p>{% endif %}
+    <div class="actions"><button type="button" data-dismiss>取消</button><button class="btn primary" {{ 'disabled' if not available }}>加入团队</button></div>
+  </form>
+</dialog>
+{% endif %}

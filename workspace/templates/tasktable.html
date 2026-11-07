@@ -1,0 +1,97 @@
+{% from 'ui.html' import badge,icon,csrf with context %}
+<div class="scroll">
+  <table class="tasktable">
+    <thead>
+      <tr>
+        <th>任务 / {{'所属项目' if source=='todo' else '关联节点'}}</th>
+        <th>待办人</th>
+        <th>截止日期</th>
+        <th>完成情况</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for t in items %}
+        <tr data-task
+            data-state="{{ t.status }}"
+            data-late="{{ 1 if t.status!='已完成' and days(t.due)<0 else 0 }}">
+          <td>
+            {% if source=='project' and manage and not p.closed_at %}
+              <a data-task-editor class="task-name" href="/projects/{{ p.id }}/tasks/{{ t.id }}/edit">{{ t.name }}</a>
+            {% else %}<b>{{ t.name }}</b>{% endif %}
+          {% if t.is_key %} <span class="tag">节点任务</span>
+      {% endif %}
+      <small>
+        {% if source=="todo" %}
+          <a href="{{ url_for('work.project', pid=t.project_id, team=t.team_id) }}">{{ t.project_name }}</a> · {% endif %}{{ t.milestone_name or '仅归属项目' }}</small>
+    </td>
+    <td>{{ t.assignees|map(attribute='name')|join('、') }}</td>
+    <td class="{{ 'negative' if t.status!='已完成' and days(t.due)<0}}">{{ t.due }}{% if t.status!="已完成" and days(t.due)<0 %}
+      <small>已逾期 {{- days(t.due) }} 天</small>
+    {% endif %}
+    {% if t.start_date %}<small>开始 {{ t.start_date }}</small>{% endif %}
+  </td>
+  <td>{{ badge(t.status) }}{% if t.note %}
+    <small>{{ t.note }}</small>
+  {% endif %}
+  {% if t.done_at %}
+    <small>{{ t.finisher }} · {{ t.done_at[:10] }}</small>
+  {% endif %}
+</td>
+<td>
+  {% if (t.can_update if source=='todo' else g.user.role!="总监" and (manage or g.user.id in t.assignee_ids)) %}
+    <div class="rowactions">
+      {% if source=="project" %}
+        {% for s in statuses %}
+          <button type="button" class="status-action" data-open="status-{{ t.id }}"
+                  data-next-state="{{ s }}" {{ 'disabled' if t.is_key and t.status=='已完成' and s!='已完成' }}>{{ s }}</button>
+        {% endfor %}
+      {% else %}
+      {% if t.status!="已完成" %}
+        <form method="post"
+              action="/projects/{{ t.project_id }}/tasks/{{ t.id }}/status">
+          {{ csrf() }}<input type="hidden" name="revision" value="{{ t.revision }}"><input type="hidden" name="source" value="{{ source }}">
+          <input type="hidden" name="status" value="已完成">
+          <input type="hidden"
+                 name="note"
+                 value="{{ t.note if t.status!='受阻' else '' }}">
+          <button class="textbtn">完成</button>
+        </form>
+      {% endif %}
+      <button data-open="status-{{ t.id }}" class="textbtn">更新</button>
+      {% endif %}
+    </div>
+  {% else %}
+    <span class="muted">—</span>
+  {% endif %}
+</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+<p class="empty" id="empty-tasks" {{'hidden' if items}}>暂无符合条件的任务</p>
+{% for t in items if (t.can_update if source=='todo' else g.user.role!='总监' and (manage or g.user.id in t.assignee_ids)) %}
+  <dialog id="status-{{ t.id }}" aria-labelledby="status-title-{{ t.id }}">
+    <form method="post"
+          action="/projects/{{ t.project_id }}/tasks/{{ t.id }}/status">
+      {{ csrf() }}<input type="hidden" name="revision" value="{{ t.revision }}"><input type="hidden" name="source" value="{{ source }}">
+      <h2 id="status-title-{{ t.id }}">{{ '更新任务' if source=='todo' else '更新任务状态' }}<span data-status-title></span></h2>
+      <p>{{ t.name }}</p>
+      {% if source=='todo' %}<label>
+        任务状态<select name="status">
+        {% for s in statuses %}
+          <option {{'selected' if s==t.status}}>{{ s }}</option>
+        {% endfor %}
+        </select>
+      </label>{% else %}<input type="hidden" name="status" value="{{ t.status }}">{% endif %}
+      <label>
+        进展说明（受阻时必填）<textarea name="note" maxlength="600" rows="3" {{'required' if t.status=='受阻'}}>{{t.note}}</textarea>
+      </label>
+      <div class="actions">
+        <button type="button" data-dismiss>取消</button>
+        <button class="btn primary">保存</button>
+      </div>
+    </form>
+  </dialog>
+{% endfor %}

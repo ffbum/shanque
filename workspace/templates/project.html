@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% from 'ui.html' import back,badge,clock,deviation,selector,icon with context %}
+{% block title %}{{ p.name }}{% endblock %}
+{% block content %}
+  <div class="page">
+    {{ back() }}
+    <div class="pagehead">
+      <div>
+        <h1>{{ p.name }}</h1>
+        <p>计划工期　{{ p.start_date ~ ' 至 ' ~ p.end_date if p.start_date else '待补充起止日期' }}</p>
+        <p>负责人　{{ p.leads|map(attribute='name')|join('、') }}　 ·　 {{ badge(p.state) }}</p>
+      </div>
+      {% if manage and not p.closed_at %}
+        <div class="toolbar">
+          <a class="btn" href="/projects/{{ p.id }}/edit">{{ icon('pen', 15) }}编辑项目</a>
+          <button class="btn"
+                  data-open="close"
+                  {{'disabled' if p.pending}}
+                  title="{{'仍有未达成节点' if p.pending else '查看结项清单'}}">办理结项</button>
+        </div>
+      {% endif %}
+    </div>
+    {% if p.description or p.progress %}
+      <section class="panel brief">
+        {% if p.description %}
+          <div>
+            <h3>项目说明</h3>
+            <p>{{ p.description }}</p>
+          </div>
+        {% endif %}
+        {% if p.progress %}
+          <div>
+            <h3>最近进展</h3>
+            <p>{{ p.progress }}</p>
+            <small>{{ p.editor }} · {{ p.progress_at[:10] }}</small>
+          </div>
+        {% endif %}
+      </section>
+    {% endif %}
+    <section class="panel space" id="milestones">
+      <div class="panelhead">
+        <h2>
+          关键节点 <span class="count">{{ p.reached }} / {{ p.milestones|length }}</span>
+        </h2>
+        {% if g.user.role=="主管" and not p.closed_at %}
+          <a class="btn sm" href="/projects/{{ p.id }}/milestones/new">{{ icon('plus', 14) }}添加节点</a>
+        {% endif %}
+      </div>
+      {% for m in p.milestones %}
+        <details class="milestone"
+                 {{ 'open' if request.args.get("node")==m.id|string}}>
+          <summary><span class="nodeicon {{'reached' if m.achieved}}">{{ icon('checked' if m.achieved else 'flag',17) }}</span><span class="nodetitle"><b>{{ m.name }}</b><small>计划 {{ m.planned }}{% if m.forecast %} · 预计 {{ m.forecast }}{% endif %}
+            </small></span><span class="nodestatus">
+            {% if m.achieved %}{{ badge("已完成") }}{% else %}{{ clock(m) }} {{ deviation(m) }}{% endif %}
+            </span><span class="muted">{{ m.remaining|length }} 项未完</span>{{ icon('down', 15) }}
+          </summary>
+          <div class="nodebody">
+            <p>{{'节点任务：'+m.key.name if m.key else '由项目负责人或主管手动确认达成'}}{% if m.achieved %} · {{ m.actor_name }} 于 {{ m.achieved[:10] }} 达成（{% set d = delta(m.achieved,m.planned) %}{{'晚 '+d|string+' 天' if d>0 else ('提前 '+(-d)|string+' 天' if d<0 else '按期')}}）{% endif %}
+            </p>
+            {% for t in m.remaining %}
+              <p>• {{ t.name }}　{{ t.assignees|map(attribute='name')|join('、') }}　{{ t.due }}　{{ t.status }}</p>
+            {% endfor %}
+            <div class="toolbar">
+              {% if manage and not m.achieved %}
+                <form method="post"
+                      action="/projects/{{ p.id }}/milestones/{{ m.id }}/confirm">
+                  {{ csrf() }}
+                  <input type="hidden" name="force" value="1">
+                  <button class="btn sm" data-confirm="完成「{{ m.name }}」并将该节点当前所有未完任务（{{ m.remaining|length }} 项）标为已完成？">{{ '强制完成节点' if m.remaining else '确认达成' }}</button>
+                </form>
+              {% endif %}
+              {% if g.user.role=="主管" and not m.achieved and not p.closed_at %}
+                <a class="btn sm" href="/projects/{{ p.id }}/milestones/{{ m.id }}/edit">编辑节点</a>
+              {% endif %}
+            </div>
+          </div>
+        </details>
+      {% else %}
+        <p class="empty">尚未设置关键节点</p>
+      {% endfor %}
+    </section>
+    <section class="panel space" id="tasks">
+      <div class="panelhead">
+        <h2>
+          项目任务 <span class="count">{{ p.done }} / {{ p.tasks|length }} 完成</span>
+        </h2>
+        <div class="toolbar">
+          <select id="task-filter" aria-label="筛选任务">
+            {% for s in ['全部任务','受阻','逾期','未开始','进行中','已完成'] %}
+              <option {{ 'selected' if request.args.get("filter")==s}}>{{ s }}</option>
+            {% endfor %}
+          </select>
+          {% if manage and not p.closed_at %}
+            <a class="btn sm primary" data-task-editor href="/projects/{{ p.id }}/tasks/new">布置任务</a>
+          {% endif %}
+        </div>
+      </div>
+      {% with items=p.tasks,source="project" %}
+        {% include "tasktable.html" %}
+      {% endwith %}
+    </section>
+    <section class="panel space">
+      <div class="panelhead">
+        <h2>
+          项目成员 <span class="count">{{ p.members|length }}</span>
+        </h2>
+        {% if manage and not p.closed_at %}
+          <button class="btn sm" data-open="members">维护成员</button>
+        {% endif %}
+      </div>
+      <div class="chips">
+        {% for u in p.members %}
+          <span>{{ u.name }}{{' · 负责人' if u.lead}}{{' · 停用' if not u.active}}</span>
+{% else %}尚无成员{% endfor %}
+  </div>
+  </section>
+  {% if manage and not p.closed_at %}
+    <dialog id="task-editor" aria-label="任务表单"></dialog>
+    <dialog id="members" aria-labelledby="members-title">
+      <h2 id="members-title">维护成员</h2>
+      <form method="post" action="/projects/{{ p.id }}/members">
+        {{ csrf() }}
+        <fieldset>
+          <legend>添加部门人员</legend>
+          {{ selector('members',staff|rejectattr('id','in',p.members|map(attribute='id')|list)|list) }}
+        </fieldset>
+        <div class="actions">
+          <button class="btn primary">添加所选人员</button>
+        </div>
+      </form>
+      {% for u in p.members if not u.lead %}
+        <form class="memberrow" method="post" action="/projects/{{ p.id }}/members">
+          {{ csrf() }}{{ u.name }}<button name="remove"
+                                          value="{{ u.id }}"
+                                          class="textbtn"
+                                          data-confirm="移出此成员？">移出</button>
+        </form>
+      {% endfor %}
+      <button data-dismiss>关闭</button>
+    </dialog>
+    <dialog id="close" aria-labelledby="close-title">
+      <form action="/projects/{{ p.id }}/close" method="post">
+        {{ csrf() }}
+        <h2 id="close-title">确认结项</h2>
+        <p>未完成任务 {{ p.tasks|length-p.done }} 项，结项后继续跟踪。</p>
+        {% for t in p.tasks if t.status!='已完成' %}
+          <p>• {{ t.name }} · {{ t.assignees|map(attribute='name')|join('、') }}</p>
+        {% endfor %}
+        <div class="actions">
+          <button type="button" data-dismiss>取消</button>
+          <button class="btn primary">确认结项</button>
+        </div>
+      </form>
+    </dialog>
+  {% endif %}
+  </div>
+{% endblock %}

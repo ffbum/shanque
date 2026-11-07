@@ -1,0 +1,15 @@
+{
+  "name": "shanque-workspace",
+  "private": true,
+  "scripts": {
+    "antd": "antd",
+    "frontend:dev": "node scripts/frontend.cjs dev",
+    "frontend:build": "node scripts/frontend.cjs build",
+    "frontend:check": "node scripts/frontend.cjs setup && npm --prefix frontend run lint && antd lint frontend/src"
+  },
+  "devDependencies": {
+    "@ant-design/cli": "6.7.0",
+    "node": "22.22.2"
+  },
+  "license": "Apache-2.0"
+}

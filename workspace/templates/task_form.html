@@ -1,0 +1,40 @@
+{% from 'ui.html' import csrf,selector with context %}
+<form method="post" action="{{ request.path }}" class="task-form" data-today="{{ today().isoformat() }}">
+  {{ csrf() }}
+  {% if item %}<input type="hidden" name="revision" value="{{ item.revision }}">{% endif %}
+  <h2>{{ '编辑任务' if item else '布置任务' }}</h2>
+  <p>{{ p.name }}</p>
+  <label>任务名称<input name="name" maxlength="120" required autofocus value="{{ item.name if item else '' }}"></label>
+  <label>关联节点
+    <select name="milestone_id">
+      <option value="">仅归属项目</option>
+      {% for m in ms %}
+        <option value="{{ m.id }}" data-date="{{ m.planned }}"
+                {{ 'selected' if item and item.milestone_id==m.id }}>{{ m.name }} · {{ m.planned }}{{ '（已达成）' if m.achieved }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <div class="pair">
+    <label>开始日期<input type="date" name="start_date" required value="{{ (item.start_date or '') if item else today().isoformat() }}"></label>
+    <label>截止日期<input type="date" name="due" required value="{{ item.due if item else '' }}"></label>
+  </div>
+  <div class="inline-calendar" hidden>
+    <div class="calendar-nav">
+      <button type="button" data-month="-1" aria-label="上个月">‹</button>
+      <strong aria-live="polite"></strong>
+      <button type="button" data-month="1" aria-label="下个月">›</button>
+    </div>
+    <div class="weekdays" aria-hidden="true">{% for d in '一二三四五六日' %}<span>{{ d }}</span>{% endfor %}</div>
+    <div class="calendar-days" role="group" aria-label="选择截止日期"></div>
+    <button type="button" class="calendar-marker" title="查看节点计划日所在月份" hidden></button>
+  </div>
+  <fieldset><legend>待办人 · 可多选</legend>{{ selector('assignees',staff,selected) }}</fieldset>
+  <div class="actions">
+    {% if item and (not item.is_key or g.user.role=='主管') %}
+      <button name="delete" value="1" class="dangerbtn" formnovalidate data-confirm="确定删除此任务？">删除任务</button>
+    {% endif %}
+    {% if request.args.get('fragment')=='1' %}<button type="button" data-dismiss>取消</button>
+    {% else %}<a class="btn" href="/projects/{{ p.id }}">取消</a>{% endif %}
+    <button class="btn primary">保存任务</button>
+  </div>
+</form>
