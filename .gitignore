@@ -17,3 +17,5 @@ frontend/.cache/
 .env.*
 *.log
 *.exe
+secrets/
+backups/

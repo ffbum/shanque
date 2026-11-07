@@ -66,80 +66,65 @@
 
 当前版本使用 SQLite，不需要单独安装数据库服务。
 
-## 服务器部署
+## Docker 部署
 
-### 环境要求
+山雀通过 Docker Compose 运行，镜像发布在 [Docker Hub](https://hub.docker.com/r/ffbum/shanque)。服务器安装 Docker Engine 和 Docker Compose v2 即可，无需单独安装 Python、Node.js 或数据库。以下命令在仓库根目录执行。
 
-- Windows 或 Linux 服务器。
-- Python 3.11；Node.js 22 和 npm 用于安装前端依赖及构建。
-- 服务器本地磁盘上的可写数据目录。
-- 客户端使用现代浏览器，通过服务器地址访问。
+### 首次启动
 
-以下命令均在仓库根目录执行。首次部署需要先安装依赖、构建前端，再启动服务。仓库不包含业务数据或预置密码，示例数据仅用于自动化测试。
-
-### Linux
+先克隆仓库：
 
 ```sh
-python3.11 -m venv .venv
-.venv/bin/python -m pip install -r requirements.txt
-npm ci
-npm --prefix frontend ci
-npm run frontend:build
-
-.venv/bin/python run.py --server --port 5086 --data-dir /srv/shanque/data
+git clone https://github.com/ffbum/shanque.git
+cd shanque
 ```
 
-提前创建 `/srv/shanque/data`，并赋予服务运行账号读写权限，也可替换为自己的绝对路径。
+Linux 上创建管理员密码文件并启动：
 
-### Windows
+```sh
+install -d -m 700 secrets
+read -rsp "设置 manager 管理员密码（8 至 128 位）: " SHANQUE_ADMIN_PASSWORD
+printf '\n'
+printf '%s' "$SHANQUE_ADMIN_PASSWORD" > secrets/admin_password
+chmod 600 secrets/admin_password
+unset SHANQUE_ADMIN_PASSWORD
 
-在 PowerShell 中执行：
+docker compose pull
+docker compose up -d
+docker compose ps
+```
+
+Windows PowerShell：
 
 ```powershell
-py -3.11 -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt
-npm ci
-npm --prefix frontend ci
-npm run frontend:build
-
-.\.venv\Scripts\python.exe run.py --server --port 5086 --data-dir D:\Shanque\data
+New-Item -ItemType Directory -Force secrets | Out-Null
+$securePassword = Read-Host "设置 manager 管理员密码（8 至 128 位）" -AsSecureString
+$pointer = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($securePassword)
+try {
+    $password = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($pointer)
+    [IO.File]::WriteAllText((Join-Path $PWD "secrets/admin_password"), $password, [Text.UTF8Encoding]::new($false))
+} finally {
+    [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($pointer)
+}
+docker compose pull
+docker compose up -d
+docker compose ps
 ```
 
-确保服务运行账号对 `D:\Shanque\data` 有读写权限。
+打开 `http://服务器地址:5086`，用账号 `manager` 和刚设置的密码登录。新数据库只创建管理员和默认团队，不含演示项目。随后在左下角的用户菜单中添加人员、设置团队，并创建项目。
 
-### 首次初始化
+Compose 将数据库和会话密钥保存在名为 `shanque-data` 的 Docker 数据卷中，容器重建或更新镜像时会保留。初始密码文件供 Compose 在每次启动时挂载，请留在服务器并限制访问；该文件已加入 Git 忽略列表。修改访问端口可设置 `SHANQUE_PORT`，例如 Linux `SHANQUE_PORT=8080 docker compose up -d`，PowerShell `$env:SHANQUE_PORT = "8080"; docker compose up -d`。
 
-首次启动时，在交互终端按提示设置 `manager` 管理员密码。密码长度为 8 至 128 位，需要输入两次。
+### 更新
 
-新数据库只初始化管理员和默认团队，不创建演示项目。随后：
-
-1. 打开 `http://服务器IP:5086`，使用 `manager` 登录。
-2. 在左下角用户菜单的“用户账户”中创建或导入人员。
-3. 在左下角用户菜单的“团队管理”中建立团队、添加人员并设置团队角色。
-4. 切换到相应团队，创建项目，设置类型、负责人、周期和节点，再按需分派任务。
-
-### 启动参数
-
-| 参数 | 说明 |
-| --- | --- |
-| `--server` | 启用多人服务模式；首次初始化时交互设置管理员密码 |
-| `--port 5086` | 服务端口，源码运行默认 5086 |
-| `--host 0.0.0.0` | 监听地址，服务器模式默认监听所有 IPv4 网卡 |
-| `--data-dir <路径>` | 数据目录，建议使用固定绝对路径；默认是仓库下的 `instance/server` |
-
-每个数据目录运行一个服务进程。Waitress 在服务器模式使用 8 个请求线程。多人可以同时查询，数据库写入依次提交；任务被他人修改后，旧页面提交会提示冲突，刷新核对后可重新操作。
-
-### 常驻服务与访问入口
-
-首次交互初始化完成后，将上述启动命令配置为操作系统服务：Linux 可用 systemd，Windows 可用服务管理工具。固定工作目录、Python 虚拟环境路径、运行账号和数据目录，并配置自动启动与日志保存。
-
-内网直连时，按访问范围开放服务端口。通过 HTTPS 反向代理访问时，可让应用只监听本机地址：
+在仓库目录执行：
 
 ```sh
-.venv/bin/python run.py --server --host 127.0.0.1 --port 5086 --data-dir /srv/shanque/data
+docker compose pull
+docker compose up -d
 ```
 
-由反向代理统一转发页面、`/api/`、`/assets/` 和 `/static/` 等所有路径到该服务。前端构建产物由 Python 直接提供，不需要另外启动前端开发服务器。
+部署使用 `latest` 镜像。数据卷独立于镜像，更新不会覆盖已有台账。
 
 ## 数据维护与升级
 
@@ -153,24 +138,39 @@ npm run frontend:build
 
 ### 备份与恢复
 
-停止服务后，复制整个数据目录保存备份。恢复时停止服务，将完整备份放入目标目录，再用相同的 `--data-dir` 启动。
+停止容器后备份数据卷，再启动服务。Linux/macOS 示例：
+
+```sh
+docker compose stop shanque
+mkdir -p backups
+docker run --rm -v shanque-data:/data -v "$(pwd)/backups:/backup" alpine:3.22 \
+  tar -czf /backup/shanque-data.tar.gz -C /data .
+docker compose start shanque
+```
+
+数据卷包含 `workspace.sqlite3`、`local.key` 和 SQLite 日志文件。恢复时先停止服务，再将备份内容写回 `shanque-data` 卷。
 
 ### 版本升级
 
-1. 停止服务，备份整个数据目录。
-2. 更新源码，安装依赖并重新构建前端。
-3. 使用原数据目录启动服务，程序会执行已有的数据库结构升级逻辑。
+1. 停止服务，备份 `shanque-data` 数据卷。
+2. 拉取新镜像并重建容器：`docker compose pull && docker compose up -d`。
+3. 程序会在启动时执行数据库结构升级逻辑。
 4. 登录核对团队、项目、节点与任务。
 
-如需回退，应配套恢复升级前的源码和数据备份。迁移到另一台服务器时，同样复制完整数据目录，并保持服务账号可读写。
+如需回退，应配套恢复升级前的镜像和数据备份。迁移服务器时，复制完整数据卷和 `secrets/admin_password`，再启动 Compose 服务。
 
 业务数据、密钥、依赖目录和构建产物均不应提交到源码仓库。对外发布时使用源码及构建流程，不附带实际企业台账。
 
 ## 开发与验证
 
-安装依赖和构建方法见上方部署步骤。前端代码、页面接口和开发说明见 [前端文档](frontend/README.md)。
+开发时需要 Python 3.11、Node.js 22 和 npm。前端代码、页面接口和开发说明见 [前端文档](frontend/README.md)。在仓库根目录安装依赖：
 
 ```sh
+python3.11 -m venv .venv
+.venv/bin/python -m pip install -r requirements.txt
+npm ci
+npm --prefix frontend ci
+
 # 前端规范与类型检查
 npm run frontend:check
 
@@ -178,12 +178,14 @@ npm run frontend:check
 npm run frontend:build
 
 # 后端业务测试（Linux）
+.venv/bin/python -m pip install -r requirements.txt
 .venv/bin/python -m unittest discover -s tests -v
 ```
 
 Windows 测试命令：
 
 ```powershell
+py -3.11 -m pip install -r requirements.txt
 .\.venv\Scripts\python.exe -m unittest discover -s tests -v
 ```
 
