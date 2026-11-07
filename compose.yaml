@@ -1,12 +1,10 @@
 services:
   shanque:
-    image: ffbum/shanque:latest
+    image: ffbum/shanque:1.0
     ports:
       - "${SHANQUE_PORT:-5086}:5086"
     environment:
-      SHANQUE_ADMIN_PASSWORD_FILE: /run/secrets/admin_password
-    secrets:
-      - admin_password
+      SHANQUE_ADMIN_PASSWORD: "CHANGE_ME_BEFORE_STARTING"
     volumes:
       - shanque-data:/data
     restart: unless-stopped
@@ -20,10 +18,6 @@ services:
       timeout: 5s
       retries: 3
       start_period: 10s
-
-secrets:
-  admin_password:
-    file: ./secrets/admin_password
 
 volumes:
   shanque-data:

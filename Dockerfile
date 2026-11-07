@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM node:22-bookworm-slim AS frontend-build
+FROM --platform=$BUILDPLATFORM node:22-bookworm-slim AS frontend-build
 WORKDIR /build
 
 COPY package.json ./
@@ -12,7 +12,7 @@ COPY frontend ./frontend
 RUN npm run frontend:build
 
 FROM python:3.11-slim-bookworm AS runtime
-ARG VERSION=0.0.0
+ARG VERSION=1.0
 ARG VCS_REF=unknown
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \

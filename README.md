@@ -2,6 +2,8 @@
 
 **面向企业各类项目的轻量项目跟踪与协作工具。**
 
+当前发布版本：**1.0**。
+
 团队成员可围绕项目、关键节点和任务，集中呈现计划、实际进展与时间差距，帮助团队在日常跟踪和例会上掌握全局。
 
 适用于科研、工程、固定资产投资、自研和预研等各类企业项目。
@@ -68,7 +70,7 @@
 
 ## Docker 部署
 
-山雀通过 Docker Compose 运行，镜像发布在 [Docker Hub](https://hub.docker.com/r/ffbum/shanque)。服务器安装 Docker Engine 和 Docker Compose v2 即可，无需单独安装 Python、Node.js 或数据库。以下命令在仓库根目录执行。
+山雀通过 Docker Compose 运行，镜像发布在 [Docker Hub](https://hub.docker.com/r/ffbum/shanque)，当前版本为 `ffbum/shanque:1.0`。服务器安装 Docker Engine 和 Docker Compose v2 即可，无需单独安装 Python、Node.js 或数据库。
 
 ### 首次启动
 
@@ -79,33 +81,9 @@ git clone https://github.com/ffbum/shanque.git
 cd shanque
 ```
 
-Linux 上创建管理员密码文件并启动：
+打开 `compose.yaml`，将 `SHANQUE_ADMIN_PASSWORD` 的 `CHANGE_ME_BEFORE_STARTING` 替换为 8 至 128 位的初始管理员密码。新数据库首次启动时用它创建 `manager`，之后密码保存在数据卷的数据库中。不要提交包含实际密码的 `compose.yaml`。
 
 ```sh
-install -d -m 700 secrets
-read -rsp "设置 manager 管理员密码（8 至 128 位）: " SHANQUE_ADMIN_PASSWORD
-printf '\n'
-printf '%s' "$SHANQUE_ADMIN_PASSWORD" > secrets/admin_password
-chmod 600 secrets/admin_password
-unset SHANQUE_ADMIN_PASSWORD
-
-docker compose pull
-docker compose up -d
-docker compose ps
-```
-
-Windows PowerShell：
-
-```powershell
-New-Item -ItemType Directory -Force secrets | Out-Null
-$securePassword = Read-Host "设置 manager 管理员密码（8 至 128 位）" -AsSecureString
-$pointer = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($securePassword)
-try {
-    $password = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($pointer)
-    [IO.File]::WriteAllText((Join-Path $PWD "secrets/admin_password"), $password, [Text.UTF8Encoding]::new($false))
-} finally {
-    [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($pointer)
-}
 docker compose pull
 docker compose up -d
 docker compose ps
@@ -113,7 +91,7 @@ docker compose ps
 
 打开 `http://服务器地址:5086`，用账号 `manager` 和刚设置的密码登录。新数据库只创建管理员和默认团队，不含演示项目。随后在左下角的用户菜单中添加人员、设置团队，并创建项目。
 
-Compose 将数据库和会话密钥保存在名为 `shanque-data` 的 Docker 数据卷中，容器重建或更新镜像时会保留。初始密码文件供 Compose 在每次启动时挂载，请留在服务器并限制访问；该文件已加入 Git 忽略列表。修改访问端口可设置 `SHANQUE_PORT`，例如 Linux `SHANQUE_PORT=8080 docker compose up -d`，PowerShell `$env:SHANQUE_PORT = "8080"; docker compose up -d`。
+Compose 将数据库和会话密钥保存在名为 `shanque-data` 的 Docker 数据卷中，容器重建或更新镜像时会保留。修改访问端口可设置 `SHANQUE_PORT`，例如 Linux `SHANQUE_PORT=8080 docker compose up -d`，PowerShell `$env:SHANQUE_PORT = "8080"; docker compose up -d`。
 
 ### 更新
 
@@ -124,7 +102,7 @@ docker compose pull
 docker compose up -d
 ```
 
-部署使用 `latest` 镜像。数据卷独立于镜像，更新不会覆盖已有台账。
+Compose 固定使用版本标签，更新版本时先将 `compose.yaml` 中的镜像标签改为目标版本，再执行上述命令。数据卷独立于镜像，更新不会覆盖已有台账。
 
 ## 数据维护与升级
 
@@ -157,7 +135,7 @@ docker compose start shanque
 3. 程序会在启动时执行数据库结构升级逻辑。
 4. 登录核对团队、项目、节点与任务。
 
-如需回退，应配套恢复升级前的镜像和数据备份。迁移服务器时，复制完整数据卷和 `secrets/admin_password`，再启动 Compose 服务。
+如需回退，应配套恢复升级前的镜像和数据备份。迁移服务器时，复制完整数据卷并启动 Compose 服务；只有新建空数据卷时才需要设置初始管理员密码。
 
 业务数据、密钥、依赖目录和构建产物均不应提交到源码仓库。对外发布时使用源码及构建流程，不附带实际企业台账。
 
