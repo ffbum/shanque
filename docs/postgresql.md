@@ -7,7 +7,7 @@
 复制 `.env.example` 为 `.env`，设置初始管理员密码，并修改以下字段：
 
 ```dotenv
-SHANQUE_IMAGE=shanque:local
+SHANQUE_IMAGE=ffbum/shanque:1.1
 SHANQUE_PORT=5086
 SHANQUE_ADMIN_PASSWORD='请设置8至128位初始密码'
 SHANQUE_DB_TYPE=kingbase
@@ -65,8 +65,7 @@ CREATE SCHEMA shanque AUTHORIZATION shanque_app;
 ```bash
 cp .env.example .env
 # 编辑 .env
-# 当前发布镜像 1.0 不包含此适配，从当前源码构建。
-docker compose build shanque
+docker compose pull shanque
 docker compose up -d shanque
 docker compose ps
 docker compose logs --tail=100 shanque
@@ -84,7 +83,7 @@ PostgreSQL 配置将类型改为 `postgresql`，端口改为实际端口（默�
 
 ```bash
 docker compose stop shanque
-docker compose build shanque
+docker compose pull shanque
 docker compose run --rm --no-deps --entrypoint python shanque   scripts/migrate_sqlite_to_pg.py /data/workspace.sqlite3   --backup /data/before-external-db.sqlite3
 docker compose up -d shanque
 ```
@@ -99,7 +98,7 @@ docker compose up -d shanque
 
 外部数据库由数据库管理员使用 KingbaseES `sys_dump/sys_restore` 或 PostgreSQL `pg_dump/pg_restore` 维护备份；仅备份 `shanque-data` 卷不包含外部库中的业务数据。升级前同时备份数据库和应用数据卷。
 
-应用账号需保留其创建对象的所有权，以支持后续表结构升级。保持 `.env` 与数据卷，更新源码后重新构建并启动应用。
+应用账号需保留其创建对象的所有权，以支持后续表结构升级。保持 `.env` 与数据卷，设置目标镜像版本后拉取并启动应用。
 
 ## 回归入口
 
@@ -115,4 +114,4 @@ python scripts/test_postgres.py
 
 SQLite/配置测试 32 项通过；ARM64 KingbaseES PG 模式业务回归 32 项通过。专用 schema 建表及查询已验证，与同一 database 的 public 表隔离。普通账号（非超级用户）的外部数据库建表、登录、项目读写与 SQLite 迁移已验证。
 
-ARM64 运行使用 Docker Desktop 仿真；麒麟 V10 实机与其他 KingbaseES 版本需按实际部署环境验收。已发布镜像 1.0 不包含本次适配，请从当前源码构建。
+ARM64 运行使用 Docker Desktop 仿真；麒麟 V10 实机与其他 KingbaseES 版本需按实际部署环境验收。1.0 镜像不包含外部数据库适配，请使用 1.1 或更新版本。

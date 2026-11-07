@@ -2,7 +2,7 @@
 
 **面向企业各类项目的轻量项目跟踪与协作工具。**
 
-当前发布版本：**1.0**。
+当前发布版本：**1.1**。更新内容见 [版本更新说明](CHANGELOG.md)。
 
 团队成员可围绕项目、关键节点和任务，集中呈现计划、实际进展与时间差距，帮助团队在日常跟踪和例会上掌握全局。
 
@@ -82,7 +82,7 @@
 
 ## Docker 部署
 
-当前源码通过 Docker Compose 构建应用镜像 `shanque:local`，支持在 `.env` 选择数据库。服务器需要 Docker Engine 和 Docker Compose v2，无需单独安装 Python 或 Node.js。已发布的 `ffbum/shanque:1.0` 不包含本次外部数据库适配；使用此功能请从当前源码构建。
+通过 Docker Compose 使用镜像 `ffbum/shanque:1.1`，支持在 `.env` 选择数据库。服务器需要 Docker Engine 和 Docker Compose v2，无需单独安装 Python 或 Node.js。
 
 ### 首次启动
 
@@ -102,7 +102,8 @@ cp .env.example .env
 PowerShell 使用 `Copy-Item .env.example .env`。编辑 `.env`，将 `SHANQUE_ADMIN_PASSWORD` 的 `CHANGE_ME_BEFORE_STARTING` 替换为 8 至 128 位的密码；保留单引号。也可在这里修改镜像版本和访问端口。`.env` 不提交到 Git。新数据库首次启动时会用该密码创建 `manager`，之后密码保存在数据卷的数据库中。
 
 ```sh
-docker compose up -d --build
+docker compose pull
+docker compose up -d
 docker compose ps
 ```
 
@@ -115,10 +116,11 @@ SQLite 模式将数据库和会话密钥保存在 `shanque-data` 数据卷中；
 在仓库目录执行：
 
 ```sh
-docker compose up -d --build
+docker compose pull
+docker compose up -d
 ```
 
-源码部署更新后重新构建应用镜像。数据卷和外部数据库独立于应用镜像。若使用已发布镜像，按对应版本说明更新。
+在 `.env` 中设置目标镜像版本后拉取并启动。需要从源码构建时可执行 `docker compose up -d --build`。数据卷和外部数据库独立于应用镜像。
 
 ## 数据维护与升级
 
@@ -149,7 +151,7 @@ docker compose start shanque
 ### 版本升级
 
 1. 停止服务，备份 `shanque-data` 数据卷。
-2. 重新构建并启动容器：`docker compose up -d --build`。
+2. 拉取并启动目标版本：`docker compose pull && docker compose up -d`。
 3. 程序会在启动时执行数据库结构升级逻辑。
 4. 登录核对团队、项目、节点与任务。
 

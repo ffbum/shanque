@@ -1,18 +1,19 @@
 # syntax=docker/dockerfile:1
 
 FROM --platform=$BUILDPLATFORM node:22-bookworm-slim AS frontend-build
+ARG NPM_CONFIG_REGISTRY=https://registry.npmjs.org/
 WORKDIR /build
 
 COPY package.json ./
 COPY scripts/frontend.cjs scripts/frontend.cjs
 COPY frontend/.npmrc frontend/package.json frontend/package-lock.json frontend/
-RUN npm --prefix frontend ci
+RUN npm --prefix frontend ci --no-audit --no-fund
 
 COPY frontend ./frontend
 RUN npm run frontend:build
 
 FROM python:3.11-slim-bookworm AS runtime
-ARG VERSION=1.0
+ARG VERSION=1.1
 ARG VCS_REF=unknown
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
