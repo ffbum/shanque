@@ -8,6 +8,12 @@
 
 适用于科研、工程、固定资产投资、自研和预研等各类企业项目。
 
+## 在线演示
+
+- 地址：[shanque.yuanworks.win](https://shanque.yuanworks.win/)
+- 测试账号：`manager`
+- 测试密码：`57fd1b95e49b285633ad2699`
+
 ## 界面预览
 
 以下截图使用演示数据。
