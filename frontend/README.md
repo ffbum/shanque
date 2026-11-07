@@ -21,7 +21,7 @@ npm run frontend:build
 
 - Workbench.tsx：ProLayout、登录、会话、左下角团队切换、菜单和路由数据加载。
 - Overview.tsx：项目指标、默认展开的项目台账、节点日期差和进展更新。
-- Project.tsx、Tasks.tsx、RecordEditor.tsx：项目设置、成员、节点、多人任务、内嵌日历和状态说明。
+- Project.tsx、Tasks.tsx、RecordEditor.tsx：项目设置、成员、节点、多人任务、日期选择和状态说明。
 - Gantt.tsx：项目／节点／任务树、固定 24 像素日刻度、拖动日期栏、默认定位今天、筛选及展开收起。
 - People.tsx：当前团队人员、管理员团队维护、项目共享和底层用户账户／Excel 导入。
 

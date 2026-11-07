@@ -1,7 +1,6 @@
 import {
   Alert,
   Button,
-  Calendar,
   DatePicker,
   Form,
   Input,
@@ -21,7 +20,6 @@ import ProjectTypeIcon, { projectTypes } from './ProjectTypeIcon';
 function TaskFields({ data }: { data: PageData }) {
   const form = Form.useFormInstance();
   const mid = Form.useWatch('milestone_id', form);
-  const due = Form.useWatch('due', form);
   const node = data.ms?.find((m) => m.id === mid);
   return (
     <>
@@ -63,24 +61,6 @@ function TaskFields({ data }: { data: PageData }) {
         <DatePicker allowClear={false} />
       </Form.Item>
       {node && <Tag color="blue">节点计划日 {node.planned}</Tag>}
-      <div className="task-calendar">
-        <Calendar
-          fullscreen={false}
-          value={due || dayjs()}
-          onSelect={(value, info) => {
-            if (info.source === 'date') form.setFieldValue('due', value);
-          }}
-          cellRender={(date, info) =>
-            info.type === 'date' &&
-            node &&
-            date.format('YYYY-MM-DD') === node.planned ? (
-              <span className="node-day" title="节点计划日">
-                节点
-              </span>
-            ) : null
-          }
-        />
-      </div>
     </>
   );
 }
